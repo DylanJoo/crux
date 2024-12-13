@@ -1,0 +1,11 @@
+---
+shot: 0
+ndoc: 0
+ndoc_in_demo: 0
+dataset_name: mds
+tag: test
+model: meta-llama/Meta-Llama-3.1-8B-Instruct
+model_tag: llm
+temperature: 1.0
+top_p: 0.95
+ampere_gpu: True
