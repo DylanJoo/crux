@@ -11,7 +11,7 @@ import json
 import numpy as np
 from tqdm import tqdm
 
-from prompts.mds import *
+from augmentation.prompts import prompt_topic_gen
 
 def normalize_list(string_list):
     for i in range(len(string_list)):
@@ -54,10 +54,6 @@ def main():
     parser.add_argument("--split", type=str, default='train', help="Original split of datasets")
 
     # ICL setting
-    parser.add_argument("--ndoc", type=int, help="Number of documents, the exact number will go in decoder.")
-    parser.add_argument("--ndoc_pool", type=None, help="Number of documents pool. None will be the same as ndoc")
-    parser.add_argument("--shot", type=int, help="Number of ICL demonstrations")
-    parser.add_argument("--ndoc_in_demo", type=int, default=None, help="When using --fewer_doc_in_demo, use this to designate how many docs in demo")
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
 
     # Model and name
@@ -84,29 +80,13 @@ def main():
     config = yaml.safe_load(open(args.config)) if args.config is not None else {}
     parser.set_defaults(**config)
     args = parser.parse_args()
-    if "turbo" in args.model:
-        args.max_length = 4096
-    if "16k" in args.model:
-        args.max_length = 16384
-    elif "32k" in args.model:
-        args.max_length = 32768
-    elif "turbo" in args.model:
-        args.max_length = 4096
-    elif "gpt-4" in args.model:
-        args.max_length = 8192
-    elif "llama-2" in args.model.lower() or "llama2" in args.model.lower():
-        args.max_length = 4096
-    elif "llama-3" in args.model.lower() or "llama3" in args.model.lower():
+    if "llama-3" in args.model.lower() or "llama3" in args.model.lower():
         args.max_length = 8192
     for k in args.__dict__:
         print(f"{k}: {args.__dict__[k]}")
 
     logger.info(f"Set the model max length to {args.max_length} (if not correct, check the code)")
 
-    if args.ndoc_pool is None:
-        args.ndoc_pool = args.ndoc
-    logger.info(f"Set the model max number of documents to {args.ndoc}/{args.ndoc_pool}")
-        
     # Load the model or setup the API
     if args.load_mode == 'vllm':
         from llm.base import vLLM
@@ -114,9 +94,6 @@ def main():
     elif args.load_mode == "api":
         from llm.requester import API
         llm = API(args)
-    else:
-        from llm.base import LLM
-        llm = LLM(args)
     
     # Generate prompts
     np.random.seed(args.seed)
@@ -204,9 +181,7 @@ def main():
             prompt_len = llm.prompt_len
         else:
             prompt_len = len(llm.tokenizer.tokenize(prompt))
-            output = llm.generate(prompt, 
-                max_tokens=min(args.max_new_tokens, args.max_length-prompt_len),
-            )
+            output = llm.generate(prompt, max_tokens=min(args.max_new_tokens, args.max_length-prompt_len))
 
         ## postprocess for consistent format
         output = output.replace("<|im_end|>", "").rstrip()
@@ -228,7 +203,8 @@ def main():
         logger.info(f"prompt text (length={prompt_len}): {prompt}")
         logger.info(f"Final model output: {output}") 
         item['output'] = output 
-        if idx != 0:
+
+        if idx != 0: # clear the prompt field as it's generated
             item['prompt'] = ""
 
     # Save the result
