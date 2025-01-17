@@ -20,8 +20,9 @@ class vLLM:
         self.sampling_params.max_tokens = kwargs.pop('max_tokens', 256)
         self.sampling_params.min_tokens = kwargs.pop('min_tokens', 32)
         output = self.model.generate(x, self.sampling_params)
+
         if len(output) == 1:
             return [output[0].outputs[0].text]
         else:
-            return [o.outputs[0].text for o in output] 
+            return [o.outputs[0].text for o in output]
 

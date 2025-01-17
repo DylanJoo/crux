@@ -1,30 +1,33 @@
-#!/bin/sh
-# The following lines instruct Slurm to allocate one GPU.
-#SBATCH --job-name=topics-gen
-#SBATCH --partition gpu
-#SBATCH --gres=gpu:nvidia_rtx_a6000:1
-#SBATCH --mem=32G
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --time=120:00:00
-#SBATCH --output=logs/%x.%j.out
-
+#!/bin/bash -l
+#SBATCH --job-name=train-topic-gen           # Job name
+#SBATCH --output=logs/train-topic-gen.o%j    # Name of stdout output file
+#SBATCH --error=logs/train-topic-gen.e%j     # Name of stderr error file
+#SBATCH --partition=dev-g                    # partition name
+#SBATCH --nodes=1                            # Total number of nodes 
+#SBATCH --ntasks-per-node=1                  # 8 MPI ranks per node, 16 total (2x8)
+#SBATCH --gpus-per-node=1                    # Allocate one gpu per MPI rank
+#SBATCH --time=00:30:00                      # Run time (d-hh:mm:ss)
+#SBATCH --account=project_465001396          # Project for billing
 
 source ${HOME}/.bashrc
-cd ~/mdrag
+cd ~/crux
+
+dataset_dir=~/datasets
+SIF=~/images/rocm-vllm_ubuntu22.04_rocm6.2_py3.10_torch2.3.0_vllm0.5.5.sif
+export SINGULARITY_BIND="/scratch/project_465001396,/scratch/project_465001640"
 
 # Start the experiment.
-for shard_i in $(seq 0 24);do
-    python3 augmentation/gen_topics.py \
-        --shard $shard_i --shard_size 1000 \
-        --config configs/mds-decontextualize.llama3-8b.yaml \
+for shard_i in $(seq 0 1);do
+    singularity exec $SIF \
+    python3 -m augmentation.gen_topics \
+        --config configs/crux-testing-8b.yaml \
+        --multi_news_file ${dataset_dir}/multi_news \
+        --shard $shard_i --shard_size 100 \
         --split train \
         --model meta-llama/Meta-Llama-3.1-8B-Instruct \
-        --model_tag metallama3.1-8b \
+        --batch_size 1 \
         --tag topics-gen \
-        --load_mode vllm \
         --temperature 0.7 \
         --max_new_tokens 128 \
-        --output_dir ${DATASET_DIR}/mdrag/shard_data/ \
-        --ampere_gpu 
+        --output_dir ${DATASET_DIR}/mdrag/shard_data/
 done
