@@ -1,42 +1,34 @@
-#!/bin/sh
-# The following lines instruct Slurm to allocate one GPU.
-#SBATCH --job-name=ques-gen
-#SBATCH --partition gpu
-#SBATCH --gres=gpu:nvidia_rtx_a6000:1
-#SBATCH --mem=32G
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --time=120:00:00
-#SBATCH --output=logs/%x.%j.out
+#!/bin/bash -l
+#SBATCH --job-name=train-rating-gen
+#SBATCH --partition=dev-g                    # partition name
+#SBATCH --nodes=1                            # Total number of nodes 
+#SBATCH --ntasks-per-node=1                  # 8 MPI ranks per node, 16 total (2x8)
+#SBATCH --gpus-per-node=1                    # Allocate one gpu per MPI rank
+#SBATCH --time=00:30:00                      # Run time (d-hh:mm:ss)
+#SBATCH --account=project_465001396          # Project for billing
+#SBATCH --output=logs/%x.%j.out 
+#SBATCH --error=logs/%x.%j.err 
 
 source ${HOME}/.bashrc
-cd ~/mdrag
+cd ~/crux
+
+dataset_dir=~/datasets
+SIF=~/images/rocm-vllm_ubuntu22.04_rocm6.3.1_py3.11_torch2.6.0_vllm_01-20-2025.sif
+export SINGULARITY_BIND="/scratch/project_465001396,/scratch/project_465001640"
 
 # Start the experiment.
-for split in train;do
-    python3 augmentation/gen_ratings.py \
-        --shard_dir ${DATASET_DIR}/mdrag/shard_data --shard_size 1000 \
-        --config configs/mds-decontextualize.llama3-8b.yaml \
-        --split ${split} \
+for shard_i in $(seq 0 1);do
+    singularity exec $SIF \
+    python3 -m augmentation.gen_ratings \
+        --config configs/crux-default-8b.yaml \
+        --shard $shard_i --shard_size 10 \
+        --split train \
         --model meta-llama/Meta-Llama-3.1-8B-Instruct \
-        --model_tag metallama3.1-8b \
+        --batch_size 128 \
         --tag ratings-gen \
-        --load_mode vllm \
-        --temperature 0.7 \
+        --temperature 0.0 \
+        --top_p 1.0 \
         --max_new_tokens 5 \
-        --output_dir ${DATASET_DIR}/mdrag/ \
-        --ampere_gpu
-
-# This is only made for evaluation
-# python3 augmentation/gen_ratings.py \
-#     --shard_dir ${DATASET_DIR}/mdrag/shard_data/psg --shard_size 1000 \
-#     --config configs/mds-decontextualize.llama3-8b.yaml \
-#     --split testb \
-#     --model meta-llama/Meta-Llama-3.1-8B-Instruct \
-#     --model_tag metallama3.1-8b \
-#     --tag ratings-gen/8b \
-#     --load_mode vllm \
-#     --temperature 0.7 \
-#     --max_new_tokens 5 \
-#     --output_dir ${DATASET_DIR}/mdrag/ \
-#     --ampere_gpu
+        --shard_dir ${dataset_dir}/crux/shard_data/
+        --output_dir ${dataset_dir}/crux/shard_data/
+done

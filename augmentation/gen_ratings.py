@@ -12,8 +12,9 @@ import numpy as np
 from tqdm import tqdm
 from glob import glob
 
-from augmentation.prompts import prompt_topic_gen
-# from prompts.mds import *
+from augmentation.prompts import instruction_rating, prompt_rating_gen
+from augmentation.utils import batch_iterator
+
 def normalize_text(string):
     string = string.strip()
     pattern = re.compile(r"\n")
@@ -38,7 +39,7 @@ def load_question(path, n=10):
     for i, item in enumerate(data['data']):
         example_id = item['example_id']
         outputs = item['output'].strip().split('</q>')[:n]
-        outputs = [replace_tags(o).strip() for o in outputs]
+        outputs = [replace_tags(o, 'q').strip() for o in outputs]
         questions.append({"example_id": example_id, "texts": outputs})
     return questions
 
@@ -49,18 +50,20 @@ def load_passages(path, n=3):
     for i, item in enumerate(data['data']):
         example_id = item['example_id']
 
-        doc_outputs = []
-        for doc_output in item['docs']['output']:
-            doc_output = normalize_text(doc_output)
-            if doc_output == " ":
-                doc_outputs.append(["No content."])
+        outputs = []
+        for gen_output in item['docs']['output']:
+            gen_output = normalize_text(gen_output)
+            if gen_output == " ":
+                outputs.append(["No content."])
             else:
-                doc_output = doc_output.strip().split('</p>')[:n]
-                doc_output = [replace_tags(o, 'p').strip() for o in doc_output]
-                doc_output = [o.strip() for o in doc_output if o.strip() != ""]
-                doc_outputs.append(doc_output)
+                gen_output = gen_output.strip().split('</p>')[:n]
+                gen_output = [replace_tags(o, 'p').strip() for o in gen_output]
+                gen_output = [o.strip() for o in gen_output if o.strip() != ""]
+                outputs.append(gen_output)
 
-        passages.append({"example_id": example_id, "texts": doc_outputs, 
+        passages.append({
+            "example_id": example_id, 
+            "texts": outputs, 
             "docs_full_texts": [normalize_text(d) for d in item["docs"]["full_text"]]
         })
     return passages
@@ -68,11 +71,10 @@ def load_passages(path, n=3):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default=None, help="Path to the config file")
-    parser.add_argument("--output_dir", type=str, help="directory for the output result")
+    parser.add_argument("--shard_dir", type=str, help="directory for the input source")
 
     # Source files were tranformed into `dataset` arrow object
     parser.add_argument("--split", type=str, default='train', help="Original split of datasets")
-    parser.add_argument("--shard_dir", type=str, help="Path to pre-generated results")
     parser.add_argument("--shard", type=int, default=0, help="the n-th shard")
     parser.add_argument("--shard_size", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
@@ -115,7 +117,7 @@ def main():
         from llm.requester import API
         llm = API(args)
 
-    # Load source-generated data
+    # Load source data
 
     questions_all = []
     for file in tqdm(glob(os.path.join(args.shard_dir, f"ques-gen/*-{args.split}-*.json"))):
@@ -144,7 +146,7 @@ def main():
     start = args.shard * (args.shard_size or 0)
     end = start + (args.shard_size or len(data))
     ids = list(questions_all.keys())
-    if start >= len(data):
+    if start >= len(ids):
         exit(0)
 
     ids = ids[start:end]
@@ -153,60 +155,52 @@ def main():
     logger.info("Generating output...")
 
     ratings = []
-    # for example_id in tqdm(ids):
-    for items in tqdm(
-        batch_iterator(data, size=args.batch_size), total=len(data)//args.batch_size+1
-    ):
+    for id in tqdm(ids, total=len(ids)):
 
-        for item in items:
-            example_id = item['example_id']
+        questions = questions_all[id]
+        documents = documents_all[id]
+        passages_set = passages_all[id]
 
-        questions = questions_all[example_id]
-        documents = documents_all[example_id]
-        passages_set = passages_all[example_id]
-
-        output = ""
-        output_array = []
         if len(passages_set) == 0:
             continue
 
+        output_array = []
         for i, passage_list in enumerate(passages_set):
             for j, passage in enumerate(passage_list):
 
-                output_vector = [-1 for _ in questions]
-                for k, question in enumerate(questions):
-                    prompt = prompt_rating_gen(
+                prompts = [
+                    prompt_rating_gen(
                         INST=instruction_rating,
                         Q=question,
                         C=passage,
                         PREFIX="Rating:"
-                    )
+                    ) for question in questions
+                ]
+
+                outputs = []
+                for batch_prompts in batch_iterator(prompts, args.batch_size):
+
                     if args.load_mode == 'api':
-                        output = llm.generate(prompt, max_tokens=args.max_new_tokens)
+                        output = llm.generate(prompts, max_tokens=args.max_new_tokens, min_tokens=2)
                         prompt_len = llm.prompt_len
                     else:
-                        prompt_len = len(llm.tokenizer.tokenize(prompt))
-                        output = llm.generate(prompt, 
-                            max_tokens=min(args.max_new_tokens, args.max_length-prompt_len),
-                            min_tokens=1
-                        )
-                    output = output.replace("<|im_end|>", "").rstrip()
-                    if output.endswith("End."):
-                        output = output[:-len("End.")]
+                        # prompt_len = len(llm.tokenizer.tokenize(prompt)) 
+                        output = llm.generate(prompts, max_tokens=args.max_new_tokens, min_tokens=2)
+                        prompt_len = -1
 
                     # extract rating
                     pattern = re.compile(r"\d|-\d")
-                    output = re.findall(pattern, output + "-1")[0]
-                    output = -1 if len(output) == 0 else int(output)
-                    output_vector[k] = output
+                    output = [re.findall(pattern, o + "-1")[0] for o in output]
+                    output = [-1 if len(o) == 0 else int(o) for o in output]
+                    outputs += output
 
-                output_array.append(output_vector)
+                output_array.append(outputs)
 
-            logger.info(f"Example: {example_id} - doc #{i} (generated passages)")
-            logger.info(f"Final model output: {output_vector}") 
+            logger.info(f"Example: {id} - doc #{i} (generated passages)")
+            logger.info(f"Final model output: {output_array}") 
 
         ratings.append({
-            "example_id": example_id,
+            "example_id": id,
             "documents": documents,
             "questions": questions,
             "passages": passages_set,
@@ -215,13 +209,11 @@ def main():
         del output, output_array
 
     # Save the result
-    output_dir = os.path.join(args.output_dir, args.tag)
+    output_dir = os.path.join(args.shard_dir, args.tag)
     os.makedirs(output_dir, exist_ok=True)
 
-    if args.shard is not None:
-        output_file = os.path.join(output_dir, f"{args.model_tag}-{args.split}-0.jsonl")
-    else:
-        output_file = os.path.join(output_dir, f"{args.model_tag}-{args.split}.jsonl")
+    output_file = os.path.join(output_dir, f"{args.model_tag}-{args.split}-{args.shard}.json")
+
     with open(output_file, "w") as f:
         for rating in ratings:
             f.write(json.dumps(rating)+'\n')

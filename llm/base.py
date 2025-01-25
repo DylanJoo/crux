@@ -8,7 +8,9 @@ class vLLM:
             args.model, 
             dtype='bfloat16',
             enforce_eager=True,
-            pipeline_parallel_size=(args.num_gpus or 1)
+            tensor_parallel_size=(args.num_gpus or 1),
+            pipeline_parallel_size=1, 
+            distributed_executor_backend="mp",
         )
         self.sampling_params = SamplingParams(
             temperature=args.temperature, 

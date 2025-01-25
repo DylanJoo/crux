@@ -12,9 +12,8 @@ import numpy as np
 from tqdm import tqdm
 from datasets import load_from_disk
 
-# from augmentation.prompts import prompt_topic_gen
-from prompts.mds import *
-from utils import batch_iterator
+from augmentation.prompts import instruction_passage, prompt_passage_gen
+from augmentation.utils import batch_iterator
 
 def normalize_list(string_list):
     for i in range(len(string_list)):
@@ -75,7 +74,6 @@ def main():
     # Source files were tranformed into `dataset` arrow object
     parser.add_argument("--multi_news_file", type=str, default=None)
     parser.add_argument("--duc04_file", type=str, default=None)
-    parser.add_argument("--quick_test", type=int, default=None, help="Quickly test a few examples")
     parser.add_argument("--split", type=str, default='train', help="Original split of datasets")
     parser.add_argument("--shard", type=int, default=0, help="the n-th shard")
     parser.add_argument("--shard_size", type=int, default=None)
@@ -89,7 +87,7 @@ def main():
 
     # Decoding
     parser.add_argument("--batch_size", type=int, default=1, help="The batch size for generation")
-    parser.add_argument("--temperature", type=float, default=0.5, help="Temperature for decoding")
+    parser.add_argument("--temperature", type=float, default=0, help="Temperature for decoding")
     parser.add_argument("--top_p", type=float, default=1.0, help="Nucleus sampling top-p")
     parser.add_argument("--max_new_tokens", type=int, default=64, help="Max number of new tokens to generate in one step")
     parser.add_argument("--max_length", type=int, default=8192, help="Max length the model can take. Should set properly wrt the model to avoid position overflow.")
@@ -182,7 +180,7 @@ def main():
     start = args.shard * (args.shard_size or 0)
     end = start + (args.shard_size or len(data))
     if start >= len(data):
-        exit(0) # finished
+        exit(0)
 
     data = data[start:end]
 
@@ -197,12 +195,14 @@ def main():
                 output = llm.generate(prompt[0], max_tokens=args.max_new_tokens)
                 prompt_len = llm.prompt_len
             else:
-                prompt_len = len(llm.tokenizer.tokenize(prompt)) 
-                output = llm.generate(prompt, max_tokens=min(args.max_new_tokens, args.max_length-prompt_len))
+                # prompt_len = len(llm.tokenizer.tokenize(prompt)) 
+                output = llm.generate(prompt, max_tokens=args.max_new_tokens)
+                prompt_len = -1
+
             output_array += [postprocess(o) for o in output]
 
         logger.info(f"Example: {item['example_id']} -- {item['shard_id']}")
-        logger.info(f"prompt text (length={prompt_len}): {prompt}")
+        logger.info(f"prompt text (length={prompt_len}): {prompt[-1]}")
         logger.info(f"Final model output: {output[-1]}") 
 
         logger.info(f"Number of documents {item['ndoc']}") 

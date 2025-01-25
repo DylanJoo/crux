@@ -48,8 +48,8 @@ def postprocess(output):
         output = output[:-len("End.")]
     output = output.split('Note:')[0]
     output = output.split('Report:')[0]
+    output = output.split('Report request:')[0]
     output = output.split('Instruction:')[0]
-    output = re.sub(r"\<r\>|\<\/r\>", "\n", output).strip()
     return output
 
 def main():
@@ -177,9 +177,10 @@ def main():
 
         prompt = [item['prompt'] for item in items]
         if args.load_mode == 'api':
-            output = [llm.generate(prompt[0], max_tokens=args.max_new_tokens)]
+            output = llm.generate(prompt[0], max_tokens=args.max_new_tokens)
             prompt_len = llm.prompt_len
         else:
+            # prompt_len = len(llm.tokenizer.tokenize(prompt)) 
             output = llm.generate(prompt, max_tokens=args.max_new_tokens)
             prompt_len = -1
 
