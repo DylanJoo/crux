@@ -1,13 +1,25 @@
 import asyncio
-from vllm.engine.arg_parser import ServerArgumentParser
+from vllm.engine.arg_utils import AsyncEngineArgs
+from vllm.sampling_params import SamplingParams
+
 from vllm.engine.server import serve
 import aiohttp
 
 # Function to start the vLLM server
+# async def start_vllm_server():
+#     parser = ServerArgumentParser()
+#     args = parser.parse_args([
+#         "--model", "meta-llama/Llama-3.3-70B-Instruct",  # Replace with your desired model
+#         "--pipeline-parallel-size", "4",  # Number of GPUs
+#         "--port", "8000",  # The server port
+#     ])
+#     await serve(args)
+
 async def start_vllm_server():
     parser = ServerArgumentParser()
     args = parser.parse_args([
-        "--model", "gpt-3.5-turbo",  # Replace with your desired model
+        "--model", "meta-llama/Llama-3.3-70B-Instruct",  # Replace with your desired model
+        "--pipeline-parallel-size", "4",  # Number of GPUs
         "--port", "8000",  # The server port
     ])
     await serve(args)
@@ -17,12 +29,13 @@ async def send_requests():
     async with aiohttp.ClientSession() as session:
         # Define the request payload
         payload = {
-            "prompt": "Explain asynchronous programming in Python.",
-            "max_tokens": 50,
+            "prompt": "Tell a 500 word story about Amsterdam.",
+            "max_tokens": 1024,
+            "min_tokens": 512,
         }
 
         # Send the request
-        async with session.post("http://127.0.0.1:8000/generate", json=payload) as response:
+        async with session.post("http://0.0.0.0:8000/v1", json=payload) as response:
             response_json = await response.json()
             print("Response:", response_json)
 
