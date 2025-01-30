@@ -9,13 +9,14 @@
 #SBATCH --output=logs/%x-%j.out
 
 # Set-up the environment.
-source ${HOME}/.bashrc
-conda activate rag
+cd ~/crux
+
+dataset_dir=~/datasets
 
 for split in train test testb;do
-python3 augmentation/create_collections.py \
-    --shard_dir ${DATASET_DIR}/crux/shard_data \
-    --ratings_dir ${DATASET_DIR}/crux/shard_data/ratings-gen \
+python3 augmentation/create_corpus.py \
+    --shard_dir ${dataset_dir}/crux/shard_data \
+    --ratings_dir ${dataset_dir}/crux/shard_data/ratings-gen \
     --split ${split} \
-    --output_dir ${DATASET_DIR}/crux
+    --output_dir ${dataset_dir}/crux
 done

@@ -31,7 +31,7 @@ def replace_tags(sent, tag='q'):
     sent = re.sub(pattern, '\n', sent)
     return sent
 
-def load_topic_data(path, n=1):
+def load_topics(path, n=1):
     data = json.load(open(path, 'r'))
 
     topics = []

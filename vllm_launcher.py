@@ -16,8 +16,10 @@ async def iterate_over_output_for_one_prompt(output_iterator: AsyncStream) -> st
     async for output in output_iterator:
         prompt = output.prompt
         last_text = output.outputs[0].text
+        # print(output.request_id)
 
     return last_text
+    # return prompt + f': {output.request_id} :' + last_text
 
 async def generate(
     engine: AsyncLLMEngine, 
@@ -46,7 +48,7 @@ async def main():
             ignore_eos=True,
             skip_special_tokens=False
     )
-    prompts = ["Tell a 500 word story about Amsterdam."] * 10
+    prompts = [f"Tell a 500 word story about Amsterdam. {i}. " for i in range(10)]
     outputs = await generate(engine, [str(i) for i in range(10)], prompts, sampling_params)
 
     for p, o in zip(prompts, outputs):

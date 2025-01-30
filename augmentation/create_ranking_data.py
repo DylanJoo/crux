@@ -13,9 +13,8 @@ import random
 from collections import defaultdict
 from tqdm import tqdm
 from glob import glob
-from pyserini.search.lucene import LuceneSearcher
 
-from utils import replace_tags, load_topic_data
+from utils import load_topics
 
 def check_newinfo(values, new_values):
     """
@@ -130,22 +129,23 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True) 
     writer = {
-        'topics': open(os.path.join(args.output_dir, f'{args.split}_topics_report_request.tsv'), 'w'),
-        'questions': open(os.path.join(args.output_dir,  f'{args.split}_topics_exam_questions.jsonl'), 'w'),
-        'qrel_d': open(os.path.join(args.output_dir, f'{args.split}_qrels_oracle_adhoc_dr.txt'), 'w'),
-        'qrel_p': open(os.path.join(args.output_dir,  f'{args.split}_qrels_oracle_context_pr.txt'), 'w'),
-        'judgements': open(os.path.join(args.output_dir,  f'{args.split}_judgements.jsonl'), 'w')
+        'topics': open(os.path.join(args.output_dir, f'{args.split}_topics.tsv'), 'w'),
+        'questions': open(os.path.join(args.output_dir,  f'{args.split}_questions.jsonl'), 'w'),
+        'qrel_d': open(os.path.join(args.output_dir, f'{args.split}_qrels_dr.txt'), 'w'),
+        'qrel_p': open(os.path.join(args.output_dir,  f'{args.split}_qrels_pr.txt'), 'w'),
+        'judgements': open(os.path.join(args.output_dir,  f'{args.split}_oracle-passages_judgements.jsonl'), 'w')
     }
 
     searcher = None
     if args.n_max_distractors > 0:
+        from pyserini.search.lucene import LuceneSearcher
         searcher = LuceneSearcher(args.doc_lucene_index)
 
     ## topic subset
     topics_all = []
     logger.info("load topics ...") 
     for file in tqdm(sorted(glob(os.path.join(args.shard_dir, f"topics-gen/*-{args.split}-*.json")))):
-        topic = load_topic_data(file)
+        topic = load_topics(file)
         topics_all += topic
 
     if args.random_subset > 0:

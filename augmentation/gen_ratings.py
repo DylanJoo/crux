@@ -28,8 +28,12 @@ def replace_tags(sent, tag='q'):
         sent = re.sub(r"\<q\>|\<\/q\>", "\n", sent)
     if tag == 'p':
         sent = re.sub(r"\<p\>|\<\/p\>", "\n", sent)
+    if tag == 't':
+        sent = re.sub(r"\<r\>|\<\/r\>", "\n", sent)
     pattern = re.compile(r"\n+")
     sent = re.sub(pattern, '\n', sent)
+    pattern = re.compile(r"^(\d+)*\.")
+    sent = re.sub(pattern, '', sent)
     return sent
 
 def load_question(path, n=10):

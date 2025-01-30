@@ -10,7 +10,7 @@ import json
 import numpy as np
 from tqdm import tqdm
 from glob import glob
-from utils import replace_tags, load_topic_data
+from utils import replace_tags, load_topics
 
 
 if __name__ == "__main__":
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     topics_all = []
     logger.info("load topics ...") 
     for file in tqdm(glob(os.path.join(args.shard_dir, f"topics-gen/*-{args.split}-*.json"))):
-        topic = load_topic_data(file)
+        topic = load_topics(file)
         topics_all += topic
     if args.random_subset > 0:
         np.random.seed(args.random_subset)

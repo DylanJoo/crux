@@ -9,17 +9,17 @@
 #SBATCH --output=logs/%x-%j.out
 
 # Set-up the environment.
-source ${HOME}/.bashrc
-conda activate rag
-cd ~/mdrag
+cd ~/crux
+
+dataset_dir=~/datasets
 
 for split in test testb;do
 for threshold in 1 2 3 4 5;do
-    python3 augmentation/create_context_ranking_data.py \
-        --shard_dir ${DATASET_DIR}/crux/shard_data \
-        --ratings_dir ${DATASET_DIR}/crux/shard_data/ratings-gen \
+    python3 augmentation/create_ranking_data.py \
+        --shard_dir ${dataset_dir}/crux/shard_data \
+        --ratings_dir ${dataset_dir}/crux/shard_data/ratings-gen \
         --split ${split} \
-        --output_dir ${DATASET_DIR}/crux/ranking_${threshold} \
+        --output_dir ${dataset_dir}/crux/ranking_${threshold} \
         --n_max_distractors 0 \
         --threshold ${threshold} 
 done
