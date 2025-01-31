@@ -17,7 +17,7 @@ SIF=~/images/rocm-vllm_ubuntu22.04_rocm6.3.1_py3.11_torch2.6.0_vllm_01-20-2025.s
 export SINGULARITY_BIND="/scratch/project_465001396,/scratch/project_465001640"
 
 # Start the experiment.
-for shard_i in $(seq 0 40);do
+for shard_i in $(seq 9 40);do
     singularity exec $SIF \
     python3 -m augmentation.gen_ratings \
         --config configs/crux-default-8b.yaml \

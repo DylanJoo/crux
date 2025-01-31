@@ -1,6 +1,6 @@
 ---
 tag: default-gen
-model: meta-llama/Meta-Llama-3.3-70B-Instruct
+model: meta-llama/Llama-3.3-70B-Instruct
 model_tag: llama-3.3-70b
 load_mode: vllm
 batch_size: 1

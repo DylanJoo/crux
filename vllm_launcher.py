@@ -3,6 +3,23 @@ import asyncio
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine, AsyncStream
 from vllm.sampling_params import SamplingParams
+# cleaning
+import contextlib
+import gc
+import torch
+from vllm.distributed import (
+        destroy_distributed_environment,
+        destroy_model_parallel
+)
+from vllm_api import PROMPT
+
+def cleanup():
+    destroy_model_parallel()
+    destroy_distributed_environment()
+    with contextlib.suppress(AssertionError):
+        torch.distributed.destroy_process_group()
+    gc.collect()
+    torch.cuda.empty_cache()
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -19,7 +36,6 @@ async def iterate_over_output_for_one_prompt(output_iterator: AsyncStream) -> st
         # print(output.request_id)
 
     return last_text
-    # return prompt + f': {output.request_id} :' + last_text
 
 async def generate(
     engine: AsyncLLMEngine, 
@@ -42,21 +58,25 @@ async def main():
     engine = AsyncLLMEngine.from_engine_args(AsyncEngineArgs.from_cli_args(args))
 
     sampling_params = SamplingParams(
-            max_tokens=100, 
+            max_tokens=512, 
             temperature=0.7, 
             top_p=0.95,
             ignore_eos=True,
             skip_special_tokens=False
     )
-    prompts = [f"Tell a 500 word story about Amsterdam. {i}. " for i in range(10)]
-    outputs = await generate(engine, [str(i) for i in range(10)], prompts, sampling_params)
+
+    ## customize here: load data and prepare your prompts
+    # prompts = [f"Tell a 500 word story about Amsterdam with the number of {i}." for i in range(100)]
+    prompts = [PROMPT for i in range(100)]
+
+    ## generate and wait
+    outputs = await generate(engine, [str(i) for i in range(100)], prompts, sampling_params)
 
     for p, o in zip(prompts, outputs):
-        print(p, "\n-->", o)
+        print("\n# Prompt:", p, "\n-->", o)
 
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    cleanup()
+    print('done')
 
 # Detail arguments: 
 # usage: vllm_launcher.py [-h] [--model MODEL]
@@ -551,3 +571,6 @@ if __name__ == "__main__":
 #                         will default to 1.0.
 #   --disable-log-requests
 #                         Disable logging requests.
+
+if __name__ == "__main__":
+    asyncio.run(main())
