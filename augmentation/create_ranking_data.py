@@ -230,6 +230,11 @@ if __name__ == "__main__":
                 for judgement in judgements:
                     writer['judgements'].write(json.dumps(judgement)+'\n')
 
+                ## step3d: copy the report's judgement
+                with open(os.path.join(args.shard_dir, f'{args.split}_oracle-report_judgements.jsonl'), 'r') as f:
+                    for line in f:
+                        writer['judgements'].write(line)
+
                 ## step3d : creating qrels 
                 for docid in oracle_docids:
                     writer['qrel_d'].write(f"{data['example_id']} 0 {docid} 1\n")
