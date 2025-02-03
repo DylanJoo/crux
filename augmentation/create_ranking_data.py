@@ -156,6 +156,10 @@ if __name__ == "__main__":
         topics_all = {r['example_id']: r['texts'] for r in topics_all}
 
     ## determine the informativeness of passages
+    with open(os.path.join(args.shard_dir, f'{args.split}_oracle-report_judgements.jsonl'), 'r') as f:
+        for line in f:
+            writer['judgements'].write(line)
+
     for file in glob(os.path.join(args.ratings_dir, f"*-{args.split}-*")):
         with open(file, 'r') as f:
             for line in f:
@@ -229,11 +233,6 @@ if __name__ == "__main__":
                 ## step3c: create judgement cache
                 for judgement in judgements:
                     writer['judgements'].write(json.dumps(judgement)+'\n')
-
-                ## step3d: copy the report's judgement
-                with open(os.path.join(args.shard_dir, f'{args.split}_oracle-report_judgements.jsonl'), 'r') as f:
-                    for line in f:
-                        writer['judgements'].write(line)
 
                 ## step3d : creating qrels 
                 for docid in oracle_docids:
