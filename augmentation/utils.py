@@ -39,7 +39,8 @@ def load_topics(path, n=1):
         example_id = item['example_id']
         outputs = item['output'].strip().split('</r>')[:n]
         outputs = [replace_tags(o, 'r').strip() for o in outputs][0]
-        topics.append({"example_id": example_id, "texts": outputs})
+        report = item['full_text']
+        topics.append({"example_id": example_id, "texts": outputs, "report": report})
     return topics
 
 def get_i_doc(i, psgs_bound):

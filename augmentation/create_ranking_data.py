@@ -130,10 +130,10 @@ if __name__ == "__main__":
     os.makedirs(args.output_dir, exist_ok=True) 
     writer = {
         'topics': open(os.path.join(args.output_dir, f'{args.split}_topics.tsv'), 'w'),
-        'questions': open(os.path.join(args.output_dir,  f'{args.split}_questions.jsonl'), 'w'),
+        'topic_examples': open(os.path.join(args.output_dir, f'{args.split}_topics.jsonl'), 'w'),
         'qrel_d': open(os.path.join(args.output_dir, f'{args.split}_qrels_dr.txt'), 'w'),
-        'qrel_p': open(os.path.join(args.output_dir,  f'{args.split}_qrels_pr.txt'), 'w'),
-        'judgements': open(os.path.join(args.output_dir,  f'{args.split}_oracle-passages_judgements.jsonl'), 'w')
+        'qrel_p': open(os.path.join(args.output_dir, f'{args.split}_qrels_pr.txt'), 'w'),
+        'judgements': open(os.path.join(args.output_dir, f'{args.split}_oracle-passages_judgements.jsonl'), 'w')
     }
 
     searcher = None
@@ -151,8 +151,10 @@ if __name__ == "__main__":
     if args.random_subset > 0:
         np.random.seed(args.random_subset)
         selected = np.random.randint(0, len(topics_all), args.random_subset)
+        reports_all = {r['example_id']: r['report'] for i, r in enumerate(topics_all) if i in selected}
         topics_all = {r['example_id']: r['texts'] for i, r in enumerate(topics_all) if i in selected}
     else:
+        reports_all = {r['example_id']: r['report'] for r in topics_all}
         topics_all = {r['example_id']: r['texts'] for r in topics_all}
 
     ## determine the informativeness of passages
@@ -224,10 +226,11 @@ if __name__ == "__main__":
                 writer['topics'].write(f"{data['example_id']}\t{topics_all[data['example_id']]}\n")
 
                 ## step3b : creating topics exam questions
-                writer['questions'].write(json.dumps({
+                writer['topic_examples'].write(json.dumps({
                     'example_id': data['example_id'],
                     'topic': topics_all[data['example_id']],
-                    'questions': questions
+                    'questions': questions,
+                    'report': reports_all[data['example_id']]
                 })+'\n')
 
                 ## step3c: create judgement cache
