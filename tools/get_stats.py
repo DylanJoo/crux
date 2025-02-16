@@ -17,7 +17,7 @@ from evaluation.llm_judge.utils import (
     load_questions, 
     load_contexts, 
     load_judgements,
-    load_qrels
+    load_qrel
 )
 
 def get_token_length(entity, tokenizer):
@@ -36,18 +36,19 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-70B-Instruct')
 
     # entities
-    topics = load_topics(
-        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_topics_exam_questions.jsonl")
+    topics, reports = load_topics(
+        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_topics.jsonl"),
+        return_reports=True
     )
     questions = load_questions(
-        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_topics_exam_questions.jsonl"),
+        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_questions.jsonl"),
         n=10 if args.split == 'test' else 15
     )
     documents = load_contexts(os.path.join(args.dataset_dir, f"documents/{args.split}_docs.jsonl"))
     passages = load_contexts(os.path.join(args.dataset_dir, f"passages/{args.split}_psgs.jsonl"))
     # judgements = load_judgements(os.path.join(args.dataset_dir, f"ranking_3/{args.split}_judgements.jsonl"))
-    qresl_3 = load_qrels(
-        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_topics_exam_questions.jsonl"),
+    qresl_3 = load_qrel(
+        os.path.join(args.dataset_dir, f"ranking_3/{args.split}_qrels_pr.txt"),
         threshold=3
     )
 
@@ -55,6 +56,11 @@ def main():
     topic_token_length = get_token_length(topics.values(), tokenizer)
     print("Topic\nAmount: {}\nAvg. length: {}\n".format(
         len(topic_token_length), round(np.mean(topic_token_length), 2)
+    ))
+
+    report_token_length = get_token_length(reports.values(), tokenizer)
+    print("Report\nAmount: {}\nAvg. length: {}\n".format(
+        len(report_token_length), round(np.mean(report_token_length), 2)
     ))
 
     flatten_questions = [q for Q in questions.values() for q in Q]
