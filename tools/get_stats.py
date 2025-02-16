@@ -79,11 +79,6 @@ def main():
         len(document_token_length), round(np.mean(document_token_length), 1)
     ))
 
-    judgementV = get_token_length(documents.values(), tokenizer)
-    print("Document\nAmount: {}\nAvg. length: {}\n".format(
-        len(document_token_length), round(np.mean(document_token_length), 1)
-    ))
-
 if __name__ == "__main__":
     main()
 
