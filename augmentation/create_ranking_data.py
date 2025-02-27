@@ -133,6 +133,7 @@ if __name__ == "__main__":
         'topic_examples': open(os.path.join(args.output_dir, f'{args.split}_topics.jsonl'), 'w'),
         'qrel_d': open(os.path.join(args.output_dir, f'{args.split}_qrels_dr.txt'), 'w'),
         'qrel_p': open(os.path.join(args.output_dir, f'{args.split}_qrels_pr.txt'), 'w'),
+        'div_qrel_p': open(os.path.join(args.output_dir, f'{args.split}_div_qrels_pr.txt'), 'w'),
         'judgements': open(os.path.join(args.output_dir, f'{args.split}_oracle-passages_judgements.jsonl'), 'w')
     }
 
@@ -233,11 +234,16 @@ if __name__ == "__main__":
                     'report': reports_all[data['example_id']]
                 })+'\n')
 
-                ## step3c: create judgement cache
+                ## step3c: creating judgement cache
+                ## step3d: creating diversity qrels 
                 for judgement in judgements:
                     writer['judgements'].write(json.dumps(judgement)+'\n')
+                    for i, answerbility in enumerate(judgement['rating']):
+                        # preserve i=0 for standard qrels, start with 1
+                        score = int( int(answerbility) > args.threshold )
+                        writer['div_qrel_p'].write(f"{data['example_id']} {i+1} {docid} {score}\n")
 
-                ## step3d : creating qrels 
+                ## step3e : creating qrels 
                 for docid in oracle_docids:
                     writer['qrel_d'].write(f"{data['example_id']} 0 {docid} 1\n")
 

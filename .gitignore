@@ -2,8 +2,7 @@ outputs/
 judgements/
 archived/
 **/archived/
-**/__pycache__/
-__pycache__/**
+**/__pycache__
 __pycache__/
 
 logs/
