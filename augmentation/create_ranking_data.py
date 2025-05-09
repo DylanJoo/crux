@@ -241,7 +241,7 @@ if __name__ == "__main__":
                     for i, answerbility in enumerate(judgement['rating']):
                         # preserve i=0 for standard qrels, start with 1
                         pid = judgement['pid']
-                        score = int( int(answerbility) > args.threshold )
+                        score = int( int(answerbility) >= args.threshold )
                         writer['div_qrel_p'].write(f"{data['example_id']} {i+1} {pid} {score}\n")
 
                 ## step3e : creating qrels 
