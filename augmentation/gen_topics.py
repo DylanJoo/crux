@@ -88,6 +88,7 @@ def main():
     config = yaml.safe_load(open(args.config)) if args.config is not None else {}
     parser.set_defaults(**config)
     args = parser.parse_args()
+
     for k in args.__dict__:
         print(f"{k}: {args.__dict__[k]}")
 
@@ -180,16 +181,32 @@ def main():
             output = llm.generate(prompt[0], max_tokens=args.max_new_tokens)
             prompt_len = llm.prompt_len
         else:
-            # prompt_len = len(llm.tokenizer.tokenize(prompt)) 
-            output = llm.generate(prompt, max_tokens=args.max_new_tokens)
-            prompt_len = -1
+            prompt_len = len(llm.tokenizer.tokenize(prompt))
+            output = llm.generate(prompt, max_tokens=min(args.max_new_tokens, args.max_length-prompt_len))
 
-        logger.info(f"Example: {items[-1]['example_id']} -- {items[-1]['shard_id']}")
-        logger.info(f"prompt text (length={prompt_len}): {prompt[-1]}")
-        logger.info(f"Final model output: {output[-1]}") 
+        ## postprocess for consistent format
+        output = output.replace("<|im_end|>", "").rstrip()
+        if output.endswith("End."):
+            output = output[:-len("End.")]
 
-        for i, item in enumerate(items):
-            item['output'] = postprocess(output[i])
+        output = output.split('Note:')[0]
+        output = output.split('Report:')[0]
+        output = output.split('Instruction:')[0]
+
+        if output == "":
+            logger.info(f"Original raw output: {output}")
+            output = llm.generate(prompt, 
+                max_tokens=min(args.max_new_tokens, args.max_length-prompt_len), 
+                min_tokens=16
+            )
+
+        logger.info(f"Example: {item['example_id']} -- {item['shard_id']}")
+        logger.info(f"prompt text (length={prompt_len}): {prompt}")
+        logger.info(f"Final model output: {output}") 
+        item['output'] = output 
+
+        if idx != 0: # clear the prompt field as it's generated
+            item['prompt'] = ""
 
     # Save the result
     data = {"args": args.__dict__, "data": data}
