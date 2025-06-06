@@ -40,14 +40,20 @@ def load_judgements(path, report_file=None):
 
     return judgements
 
-def load_topics(path):
+def load_topics(path, return_reports=False):
     topics = {}
+    reports = {}
     with open(path, 'r') as f:
         for line in f:
             item = json.loads(line.strip())
             example_id = item['example_id']
             topics[example_id] = replace_tags(item['topic'], tag='r')
-    return topics
+            reports[example_id] = item['report']
+
+    if return_reports:
+        return topics, reports
+    else:
+        return topics
 
 def load_questions(path, n=10):
     questions = {}

@@ -1,6 +1,15 @@
 import re
 import json
 
+
+def batch_iterator(iterable, size=1, return_index=False):
+    l = len(iterable)
+    for ndx in range(0, l, size):
+        if return_index:
+            yield (ndx, min(ndx + size, l))
+        else:
+            yield iterable[ndx:min(ndx + size, l)]
+
 def deduplicate_and_sort(doc_ids):
     doc_ids = list(set(doc_ids))
     sorted(doc_ids)
@@ -22,7 +31,7 @@ def replace_tags(sent, tag='q'):
     sent = re.sub(pattern, '\n', sent)
     return sent
 
-def load_topic_data(path, n=1):
+def load_topics(path, n=1):
     data = json.load(open(path, 'r'))
 
     topics = []
@@ -30,7 +39,8 @@ def load_topic_data(path, n=1):
         example_id = item['example_id']
         outputs = item['output'].strip().split('</r>')[:n]
         outputs = [replace_tags(o, 'r').strip() for o in outputs][0]
-        topics.append({"example_id": example_id, "texts": outputs})
+        report = item['full_text']
+        topics.append({"example_id": example_id, "texts": outputs, "report": report})
     return topics
 
 def get_i_doc(i, psgs_bound):
