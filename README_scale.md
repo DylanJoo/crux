@@ -1,49 +1,63 @@
-### Installation
-- Conda environment 
+### Prerequisite
+
+### Datasets
+# Evaluating retrieval - Report Generation
+
+IR evaluation metrics can be computed by running the following:
+
 ```
-conda create -n crux python=3.10
-conda activate crux
-conda install -c conda-forge openjdk=21 maven -y    
+python3 run_rac_nugget_eval.py \
+--host http://127.0.0.1 \
+--port 443 \
+--service_name plaidx-neuclir \
+--dataset_name neuclir
 ```
 
-- Packages
-```
-git clone <crux_repo>
-cd src/crux
-pip install -r requirements.txt
+This will compute evaluation metrics using the NeuCLIR reference nuggets test set (neuclir24-test-request.jsonl). The script expects that a search service is running on the specified host and port, and that the service can accept requests in the same format as the PLAID-X search service.
+
+# Evaluating retrieval - NeuCLIR topics retrieval
+Setting the initial limit as 50 (retry with increased limit till maximum 500).
+```bash
+#  DONT use public endpoint: --search_endpoint https://scale25.hltcoe.org
+python neuclir_ir_eval.py \
+    --service_endpoint 10.162.95.158:5000 \
+    --service_name plaidx-neuclir \
+    --limit 1000 \
+    --output_dir results.plaidx
+
+# results.plaidx/ir_result.json
+{
+    "2022": {
+        "zho": 0.49819554036552616,
+        "rus": 0.475934498970835,
+        "fas": 0.4442176517213668
+    },
+    "2023": {
+        "zho": 0.45467164407992805,
+        "rus": 0.5050548618457017,
+        "fas": 0.5051494408547021,
+        "mlir": 0.40227682169926543
+    },
+    "2024": {
+        "zho": 0.5291277922852041,
+        "rus": 0.4893684473514584,
+        "fas": 0.5831951736456751,
+        "mlir": 0.46445297716404205
+    }
+}
 ```
 
 # CRUX
 
-### Synthetic datasets
-- CRUX-MDS: [MultiNew](), CRUX-[DUC'04]()
-- CRUX-NeuCLIR-ReportGen
-- CRUX-Researchy
-
-### Augmented components
-
-
-### CRUX-MDS
+### Prepare source multi-document summarization dataset
+- NeuCLIR: nothing to do, files will be read from `/exp/scale25/neuclir`.
+- researchy_questions:
+Download the dataset to a local path (as this is a big dataset, you likely want to download it somewhere on `/exp/<user-id>`). You can download the dataset from huggingface by running: `python3 -m data.download_researchy_dataset` and setting the download path at the top of the file.
 
 ### Answerability
+
 Here is an example command to obtain sub-question scores:
 
-```shell
-python -m crux.augmentation.gen_ratings \
-    --shard_dir <crux_dir> --shard_size 1000 \
-    --config configs/scale.llama3-70b.yaml \
-    --split train \
-    --model llama3.3-70b-instruct \
-    --model_tag metallama3.3-70b \
-    --port 4000 \
-    --tag ratings-gen \
-    --load_mode api \
-    --temperature 0 --top_p 1 \
-    --max_new_tokens 3 \
-    --output_dir <crux_dir> \
-    --ampere_gpu
-```
-    
 ```
 python3 -m augmentation.gen_ratings \
     --shard_dir <crux_dir> --shard_size 1000 \
@@ -162,27 +176,5 @@ Indexing and Retrieve top-100
 
 * The former-stage augmentation: vanilla, BART-summarization, ReComp summarization
 
-### Example
-```json
-{
-  "id": "example_id",
-  "topic": "What is the impact of climate change on polar bears?",
-  "questions": [
-    "How does climate change affect polar bear habitats?",
-    "What are the main threats to polar bears due to climate change?"
-    ... (more questions)
-  ],
-  "passages": [
-    {
-      "contents": "Climate change is causing the Arctic ice to melt, which is crucial for polar bears.",
-      "rating": 5
-    },
-    {
-      "text": "Rising temperatures are leading to habitat loss for polar bears.",
-      "rating": 4
-    }
-  ]
-}
-```
- 
-
+### Main findings
+* Table2: The oracle retrieval context for baseline retrievla-augmentation

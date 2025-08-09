@@ -1,0 +1,18 @@
+---
+dataset_name: researchy_questions
+split: test
+tag: crux
+load_mode: litellm
+model: llama3.3-70b-instruct
+temperature: 0.0
+top_p: 1.0
+ampere_gpu: True
+max_new_tokens: 8192
+output_dir: /home/scale25/jhueiju/temp
+corpus_dir: /exp/scale25/neuclir/docs/
+
+# The output will be saved in the following directory
+# {output_dir}/{dataset_name}/{tag}/crux_ratings.jsonl
+# The following parameters are used for question generation
+# question_source_type: report_request
+# question_source_path: /exp/scale25/neuclir/topics/example-request-3.jsonl

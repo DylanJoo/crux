@@ -1,0 +1,11 @@
+---
+tag: default
+model: meta-llama/Llama-3.3-70B-Instruct
+load_mode: vllm
+batch_size: 1
+temperature: 0
+top_p: 1.0
+max_new_tokens: 3
+ampere_gpu: True
+num_gpus: 1
+total_shards: 1

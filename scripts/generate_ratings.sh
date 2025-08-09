@@ -1,33 +1,30 @@
-#!/bin/bash -l
-#SBATCH --job-name=train-rating-gen
-#SBATCH --partition=small-g                    # partition name
-#SBATCH --nodes=1                            # Total number of nodes 
-#SBATCH --ntasks-per-node=1                  # 8 MPI ranks per node, 16 total (2x8)
-#SBATCH --gpus-per-node=1                    # Allocate one gpu per MPI rank
-#SBATCH --time=72:00:00                      # Run time (d-hh:mm:ss)
-#SBATCH --account=project_465001396          # Project for billing
-#SBATCH --output=logs/%x.%j.out 
-#SBATCH --error=logs/%x.%j.err 
+#!/bin/sh
+#SBATCH --job-name=rating
+#SBATCH --cpus-per-task=32
+#SBATCH --partition cpu
+#SBATCH --mem=32G
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=05:00:00
+#SBATCH --output=%x-%j.out
 
-source ${HOME}/.bashrc
-cd ~/crux
+source $HOME/.bashrc
+cd ~/crux-scale
 
-dataset_dir=~/datasets
-SIF=~/images/rocm-vllm_ubuntu22.04_rocm6.3.1_py3.11_torch2.6.0_vllm_01-20-2025.sif
-export SINGULARITY_BIND="/scratch/project_465001396,/scratch/project_465001640"
+output_dir=$HOME/datasets/
+mkdir -p $output_dir
 
 # Start the experiment.
-for shard_i in $(seq 9 40);do
-    singularity exec $SIF \
-    python3 -m augmentation.gen_ratings \
-        --config configs/crux-default-8b.yaml \
-        --shard $shard_i --shard_size 1000 \
-        --split train \
-        --model meta-llama/Meta-Llama-3.1-8B-Instruct \
-        --batch_size 128 \
-        --tag ratings-gen \
-        --temperature 0.0 \
-        --top_p 1.0 \
-        --max_new_tokens 5 \
-        --shard_dir ${dataset_dir}/crux/shard_data/
-done
+# [1] NeuCLIR nugget questions + NeuCLIR judged documents
+# neuclir24-all-request.qrel
+# neuclir24-test-request.qrel + example-request-3.qrel
+python3 -m augmentation.gen_ratings \
+    --config configs/scale.litellm.yaml \
+    --dataset_name neuclir \
+    --tag crux-human \
+    --input /exp/scale25/neuclir/eval/nuggets \ # or someone's generated sub-questions
+    --qrels data/neuclir24-all-request.qrel \ # or the new retrieval run result
+    --output_dir $output_dir \
+    --split train \
+    --load_mode litellm \
+    --max_new_tokens 5 \

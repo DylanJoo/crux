@@ -1,12 +1,8 @@
 ---
-tag: default-gen
+dataset_name: mds
+tag: test
 model: meta-llama/Meta-Llama-3.1-8B-Instruct
-model_tag: llama-3.1-8b
-load_mode: vllm
-batch_size: 1
-temperature: 0
-top_p: 1.0
-max_new_tokens: 64
-max_length: 8192
+model_tag: llm
+temperature: 1.0
+top_p: 0.95
 ampere_gpu: True
-num_gpus: 1

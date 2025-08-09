@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crux"
+version = "0.1.19"
+description = "A modular reranking library with pluggable LLM, prompt, and parser interfaces."
+authors = [{ name = "Dylan Ju", email = "j.ju@uva.nl" }]
+dependencies = []
+
+[tool.setuptools]
+package-dir = {"" = "./"}
+
+[tool.setuptools.packages.find]
+where = ["./"]
+
+# [tool.setuptools.package-data]
+# reranking = ["configs/*.yaml"]
+

@@ -1,34 +1,30 @@
-#!/bin/bash -l
-#SBATCH --job-name=train-psg-gen
-#SBATCH --partition=dev-g                    # partition name
-#SBATCH --nodes=1                            # Total number of nodes 
-#SBATCH --ntasks-per-node=1                  # 8 MPI ranks per node, 16 total (2x8)
-#SBATCH --gpus-per-node=1                    # Allocate one gpu per MPI rank
-#SBATCH --time=00:30:00                      # Run time (d-hh:mm:ss)
-#SBATCH --account=project_465001396          # Project for billing
-#SBATCH --output=logs/%x.%j.out 
-#SBATCH --error=logs/%x.%j.err 
+#!/bin/sh
+# The following lines instruct Slurm to allocate one GPU.
+#SBATCH --job-name=psg-gen
+#SBATCH --partition gpu
+#SBATCH --gres=gpu:nvidia_rtx_a6000:1
+#SBATCH --mem=32G
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=120:00:00
+#SBATCH --output=logs/%x.%j.out
 
 source ${HOME}/.bashrc
-cd ~/crux
-
-dataset_dir=~/datasets
-SIF=~/images/rocm-vllm_ubuntu22.04_rocm6.3.1_py3.11_torch2.6.0_vllm_01-20-2025.sif
-export SINGULARITY_BIND="/scratch/project_465001396,/scratch/project_465001640"
+cd ~/mdrag
 
 # Start the experiment.
-for shard_i in $(seq 0 1);do
-    singularity exec $SIF \
-    python3 -m augmentation.gen_passages \
-        --config configs/crux-default-8b.yaml \
-        --multi_news_file ${dataset_dir}/multi_news \
-        --shard $shard_i --shard_size 10 \
+for shard_i in $(seq 0 40);do
+    python3 augmentation/gen_passages.py \
+        --shard $shard_i --shard_size 1000 \
+        --multi_news_file /home/dju/datasets/multi_news \
+        --config configs/mds-decontextualize.llama3-8b.yaml \
         --split train \
         --model meta-llama/Meta-Llama-3.1-8B-Instruct \
-        --batch_size 32 \
+        --model_tag metallama3.1-8b \
         --tag psgs-gen \
+        --load_mode vllm \
         --temperature 0.7 \
-        --top_p 0.95 \
         --max_new_tokens 640 \
-        --output_dir ${dataset_dir}/crux/shard_data/
+        --output_dir ${DATASET_DIR}/mdrag/shard_data/ \
+        --ampere_gpu 
 done

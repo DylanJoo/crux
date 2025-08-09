@@ -1,0 +1,9 @@
+---
+load_mode: api
+model: llama3.3-70b-instruct
+model_tag: litellm
+dataset_name: researchy_questions
+tag: scale
+temperature: 0.0
+top_p: 1.0
+ampere_gpu: True

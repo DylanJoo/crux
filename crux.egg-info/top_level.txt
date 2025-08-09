@@ -1,0 +1,10 @@
+analysis
+configs
+crux
+crux-mds
+crux-neuclir
+crux-ragtime
+crux-researchy
+logs
+scripts
+slurm_scripts
