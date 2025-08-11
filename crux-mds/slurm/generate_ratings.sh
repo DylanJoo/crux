@@ -11,8 +11,6 @@
 
 # Load the environment
 source $HOME/.bashrc
-enter_conda
-conda activate crux
 
 # Set the path to the multijobs file
 MULTIJOBS=${HOME}/multishards.txt

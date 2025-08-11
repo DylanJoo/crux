@@ -17,13 +17,14 @@ class LLM:
 
     def __init__(
         self,
+        model=None,
         temperature=0.0,
         top_p=1.0,
         logprobs=None,
         max_tokens=1024, 
         **kwargs
     ):
-        self.model = "llama3.3-70b-instruct"
+        self.model = model or "llama3.3-70b-instruct"
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
