@@ -1,5 +1,0 @@
-Metadata-Version: 2.4
-Name: crux
-Version: 0.1.19
-Summary: A modular reranking library with pluggable LLM, prompt, and parser interfaces.
-Author-email: Dylan Ju <j.ju@uva.nl>

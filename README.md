@@ -1,5 +1,5 @@
 ### Installation
-- Conda environment 
+- Environmet (recommend to use container + python venv)
 ```
 conda create -n crux python=3.10
 conda activate crux
@@ -8,9 +8,8 @@ conda install -c conda-forge openjdk=21 maven -y
 
 - Packages
 ```
-git clone <crux_repo>
-cd src/crux
-pip install -r requirements.txt
+python -m venv myenv --system-site-packages
+
 ```
 
 # CRUX

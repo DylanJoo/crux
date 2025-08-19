@@ -7,5 +7,5 @@ temperature: 0
 top_p: 1.0
 max_new_tokens: 3
 ampere_gpu: True
-num_gpus: 1
+num_gpus: 4
 total_shards: 1

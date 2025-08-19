@@ -6,3 +6,5 @@ archived/
 __pycache__/
 
 logs/
+*.swp
+*egg-info/*
