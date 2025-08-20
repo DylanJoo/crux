@@ -14,7 +14,7 @@ def load_topic(
     subset='multi_news', split='test', 
     root_dir='/users/judylan1/temp/datasets/crux'
 ):
-    path = os.path.join(root_dir, f"crux-mds-{subset}", "topic")
+    path = os.path.join(root_dir, f"crux-mds-{subset}", "topic/*jsonl")
     topic = {}
     for file in glob(path):
         items = [json.loads(l) for l in open(file).readlines()]
@@ -26,7 +26,7 @@ def load_subtopics(
     subset='multi_news', split='test', 
     root_dir='/users/judylan1/temp/datasets/crux'
 ):
-    path = os.path.join(root_dir, f"crux-mds-{subset}", "subtopics/*")
+    path = os.path.join(root_dir, f"crux-mds-{subset}", "subtopics/*jsonl")
     subquestions = {}
     for file in glob(path):
         items = [json.loads(l) for l in open(file).readlines()]

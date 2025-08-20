@@ -52,16 +52,20 @@ def main(
     all_subquestions = ir_utils.load_subtopics() if subset is None else ir_utils.load_subtopics(subset=subset)
     run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=3, threshold_score=0.6) 
     corpus = load_corpus(args.corpus)
-    # all_reports = ir_utils.load_report(subset=dataset, split=split)
+    # all_reports = ir_utils.load_report(subset=subset, split=split)
 
     # Load the model or setup the API
-    from ..llm.litellm_api import LLM
+    if args.load_mode == 'litellm':
+        from ..llm.litellm_api import LLM
+    else:
+        from ..llm.vllm_api import LLM
     llm = LLM(
         model=args.model,
         temperature=args.temperature,
         top_p=args.top_p,
         max_tokens=args.max_new_tokens,
-        max_model_length=args.max_model_length,
+        max_model_len=args.max_model_len,
+        num_gpus=args.num_gpus
     )
 
     # Shard by topic (qid)
@@ -71,7 +75,6 @@ def main(
         shard_size = len(qids) // args.total_shards + 1
         qids = qids[args.shard * shard_size: (args.shard + 1) * shard_size]
 
-    # Ignore already done queries
     output_path = os.path.join(
         args.output_dir, 
         f"ratings.{args.model.split('/')[-1]}.{args.shard}-{args.total_shards}.jsonl"
@@ -130,14 +133,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default=None, help="Path to the config file")
 
-    parser.add_argument("--dataset", type=str, default="researchy", help="Dataset to use")
-    parser.add_argument("--corpus", type=str, default=None, help="Path to the jsonl corpus file")
-    parser.add_argument("--output_dir", type=str, default="./", help="Tag for the model")
-    parser.add_argument("--run_path", type=str, default=None, help="Path to the run file (e.g., run.jsonl or qrel.jsonl)")
+    parser.add_argument("--dataset", type=str, default=None, help="Path to the dataset file")
+    parser.add_argument("--subset", type=str, default=None, help="Subset of the dataset to use")
+    parser.add_argument("--output_dir", type=str, help="directory for the output result")
     parser.add_argument("--shard", type=int, default=0, help="the n-th shard")
-    parser.add_argument("--total_shards", type=int, default=None, help="Total number of shards to split the dataset into")
-    parser.add_argument("--top_k", type=int, default=10, help="Top-k documents to consider for each query")
+    parser.add_argument("--total_shards", type=int, default=1, help="Total number of shards")
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
+    parser.add_argument("--corpus", type=str, default=None, help="Path to the jsonl corpus file")
+    parser.add_argument("--run_path", type=str, default=None, help="Path to the run file (e.g., run.jsonl or qrel.jsonl)")
+    parser.add_argument("--top_k", type=int, default=10, help="Top-k documents to consider for each query")
 
     # Model and decoding
     parser.add_argument("--load_mode", type=str, default='no', help="['vllm', 'api']")
@@ -146,7 +150,7 @@ if __name__ == "__main__":
     parser.add_argument("--temperature", type=float, default=0, help="Temperature for decoding")
     parser.add_argument("--top_p", type=float, default=1.0, help="Nucleus sampling top-p")
     parser.add_argument("--max_new_tokens", type=int, default=5, help="Max number of new tokens to generate in one step")
-    parser.add_argument("--max_model_length", type=int, default=8192, help="Max length the model can take.")
+    parser.add_argument("--max_model_len", type=int, default=8192, help="Max length the model can take.")
     parser.add_argument("--batch_size", type=int, default=1, help="The batch size for generation")
 
     # Load config
@@ -164,5 +168,6 @@ if __name__ == "__main__":
         args=args,
         dataset=args.dataset,
         load_mode=args.load_mode,
+        subset=args.subset,
         split='test'
     )

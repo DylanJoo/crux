@@ -1,6 +1,6 @@
 import re
 import os
-import glob
+from glob import glob
 from collections import defaultdict, OrderedDict
 import json
 from tqdm import tqdm
@@ -32,14 +32,20 @@ def load_corpus(path):
             corpus = pickle.load(f)
         return corpus
 
-    with open(path, 'r') as f:
-        for line in f:
-            data = json.loads(line.strip())
-            docid = data.get('id', data.get('_id', ''))
-            title = data.get('title', "").strip()
-            text = data.get('contents', data.get('text', "")).strip()
-            text = normalize_doc(text)
-            corpus[str(docid)] = {'title': title, 'text': text}
+    if not os.path.isdir(path):
+        files = [path]
+    else:
+        files = glob(path+"/*")
+
+    for file in files:
+        with open(file, 'r') as f:
+            for line in f:
+                data = json.loads(line.strip())
+                docid = data.get('id', data.get('_id', ''))
+                title = data.get('title', "").strip()
+                text = data.get('contents', data.get('text', "")).strip()
+                text = normalize_doc(text)
+                corpus[str(docid)] = {'title': title, 'text': text}
     return corpus
 
 def load_ratings(path):

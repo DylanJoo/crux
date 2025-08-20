@@ -50,13 +50,17 @@ def main(
     all_reports = ir_utils.load_reports(subset=subset, split=split)
 
     # Load the model or setup the API
-    from ..llm.litellm_api import LLM
+    if args.load_mode == 'litellm':
+        from ..llm.litellm_api import LLM
+    else:
+        from ..llm.vllm_api import LLM
     llm = LLM(
         model=args.model,
         temperature=args.temperature,
         top_p=args.top_p,
         max_tokens=args.max_new_tokens,
-        max_model_length=args.max_model_length,
+        max_model_len=args.max_model_len,
+        num_gpus=args.num_gpus
     )
 
     # Shard by topic (qid)
@@ -84,7 +88,7 @@ def main(
         desc=f"Dataset: {dataset} (shard: {args.shard}/{args.total_shards})",
         total=len(prompts) // args.batch_size + 1
     ):
-        output = llm.generate(batch_prompt, max_tokens=args.max_new_tokens)
+        output = llm.generate(batch_prompt)
         output = [o.split('Instruction:')[0] for o in output]
         output = [o.split('</r>')[0] for o in output]
         output = [re.sub(r'<r>', '', o) for o in output]
@@ -117,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--temperature", type=float, default=0, help="Temperature for decoding")
     parser.add_argument("--top_p", type=float, default=1.0, help="Nucleus sampling top-p")
     parser.add_argument("--max_new_tokens", type=int, default=128, help="Max number of new tokens to generate in one step")
-    parser.add_argument("--max_model_length", type=int, default=8192, help="Max length the model can take.")
+    parser.add_argument("--max_model_len", type=int, default=8192, help="Max length the model can take.")
     parser.add_argument("--batch_size", type=int, default=1, help="The batch size for generation")
 
     # Load config
@@ -134,7 +138,7 @@ if __name__ == "__main__":
     main(
         args=args,
         dataset=args.dataset,
-        subset=args.subset,
         load_mode=args.load_mode,
+        subset=args.subset,
         split='test'
     )

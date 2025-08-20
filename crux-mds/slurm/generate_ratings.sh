@@ -1,31 +1,35 @@
-#!/bin/sh
-#SBATCH --job-name=crux-cw22
-#SBATCH --cpus-per-task=32
-#SBATCH --partition cpu
-#SBATCH --mem=32G
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --array=1-1000%3
-#SBATCH --time=72:00:00
-#SBATCH --output=%x-%j.out
+#!/bin/bash -l
+#SBATCH --job-name=crux-mds-rating
+#SBATCH --output=logs/crux.out       
+#SBATCH --error=logs/crux.err
+#SBATCH --partition=dev-g         # partition name
+#SBATCH --ntasks-per-node=1         # 8 MPI ranks per node, 16 total (2x8)
+#SBATCH --nodes=1                   # Total number of nodes 
+#SBATCH --cpus-per-task=16
+#SBATCH --gpus-per-node=8           # Allocate one gpu per MPI rank
+#SBATCH --mem=120G
+#SBATCH --time=0-01:00:00           # Run time (d-hh:mm:ss)
+#SBATCH --account=project_465001640 # Project for billing
 
 # Load the environment
-source $HOME/.bashrc
+module use /appl/local/csc/modulefiles/
+module load pytorch/2.5
+source /scratch/project_465001640/personal/dylan/venv/crux_env/bin/activate
+export SINGULARITY_BIND="/scratch/project_465001640"
 
-# Set the path to the multijobs file
-MULTIJOBS=${HOME}/multishards.txt
-each=$(head -$SLURM_ARRAY_TASK_ID $MULTIJOBS | tail -1)
-echo Running on: $each
+# root_dir=/exp/scale25/artifacts/crux
+root_dir=/scratch/project_465001640/personal/dylan/datasets/crux
 
-root_dir=/exp/scale25/artifacts/crux
-
+subset=duc04
 python3 -m crux.augmentation.gen_ratings \
-    --config $HOME/crux-scale/configs/default_config.yaml \
-    --dataset researchy \
-    --corpus $root_dir/crux-researchy/docs/cw22-b-researchy-v1/corpus.pkl \
-    --output_dir $root_dir/crux-researchy/qrel \
-    --run_path $root_dir/crux-researchy/runs/run.researchy-init-q.bm25.clueweb22-b.txt \
-    ${each} --total_shards 1000 \
+    --config $HOME/crux/configs/default_config.yaml \
+    --model meta-llama/Llama-3.3-70B-Instruct \
+    --num_gpus 8 \
+    --dataset mds --subset $subset \
+    --output_dir $root_dir/crux-mds-$subset/judge/v2 \
+    --max_new_tokens 4 \
+    --max_model_len 8196 \
     --batch_size 32 \
-    --load_mode litellm
-
+    --load_mode vllm \
+    --run_path $root_dir/crux-mds-$subset/qrels/qrels.txt \
+    --corpus $root_dir/crux-mds-corpus \
