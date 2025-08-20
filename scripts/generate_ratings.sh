@@ -15,9 +15,6 @@ output_dir=$HOME/datasets/
 mkdir -p $output_dir
 
 # Start the experiment.
-# [1] NeuCLIR nugget questions + NeuCLIR judged documents
-# neuclir24-all-request.qrel
-# neuclir24-test-request.qrel + example-request-3.qrel
 python3 -m augmentation.gen_ratings \
     --config configs/scale.litellm.yaml \
     --dataset_name neuclir \

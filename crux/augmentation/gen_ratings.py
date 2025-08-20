@@ -82,6 +82,7 @@ def main(
     )
     if os.path.exists(output_path):
         ratings_done = load_ratings(output_path)
+        # TODO: remove this?
         # for id in ratings_done:
         #     hits = [docid for docid in run[id]]
         #     run[id] = {docid: run[id][docid] for docid in hits if docid not in ratings_done[id]}

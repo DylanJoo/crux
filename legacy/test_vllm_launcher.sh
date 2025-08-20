@@ -16,6 +16,6 @@ source /scratch/project_465001640/personal/dylan/venv/crux_env/bin/activate
 export SINGULARITY_BIND="/scratch/project_465001640"
 
 python3 vllm_launcher.py \
-    --model meta-llama/Llama-3.3-70B-Instruct \
+    --model openai/gpt-oss-20b \
     --dtype bfloat16 --enforce-eager \
     --tensor-parallel-size 8  --max-model-len 8192
