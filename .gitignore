@@ -8,3 +8,4 @@ __pycache__/
 logs/
 *.swp
 *egg-info/*
+**/core

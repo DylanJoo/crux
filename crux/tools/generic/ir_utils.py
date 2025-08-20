@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict
 import json
 from tqdm import tqdm
 import ir_measures
-import pandas as pd
+# import pandas as pd
 import math
 
 def load_run_or_qrel(path, topk=10, threshold=3, threshold_score=-math.inf):

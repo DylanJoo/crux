@@ -10,12 +10,18 @@ import re
 from typing import List
 import logging
 
-## Verbose filtered for HTTP200
-class vllmFilter(logging.Filter):
-    def filter(self, record):
-        return ' request' not in record.getMessage()
-logger = logging.getLogger()  # root logger
-logger.addFilter(vllmFilter())
+import logging
+
+class VllmFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # Drop logs that contain "Finished request"
+        if "Added request" in msg or "Finished request" in msg:
+            return False
+        return True
+
+# Apply filter only to vLLM logger
+vllm_logger = logging.getLogger("vllm")
+vllm_logger.addFilter(VllmFilter())
 
 class LLM:
 
