@@ -57,8 +57,9 @@ def main(
     # Load the model or setup the API
     if args.load_mode == 'litellm':
         from ..llm.litellm_api import LLM
-    else:
-        from ..llm.vllm_api import LLM
+    if args.load_mode == 'vllm':
+        from ..llm.vllm_async import LLM
+
     llm = LLM(
         model=args.model,
         temperature=args.temperature,
@@ -141,10 +142,10 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
     parser.add_argument("--corpus", type=str, default=None, help="Path to the jsonl corpus file")
     parser.add_argument("--run_path", type=str, default=None, help="Path to the run file (e.g., run.jsonl or qrel.jsonl)")
-    parser.add_argument("--top_k", type=int, default=10, help="Top-k documents to consider for each query")
+    parser.add_argument("--top_k", type=int, default=9999, help="Top-k documents to consider for each query")
 
     # Model and decoding
-    parser.add_argument("--load_mode", type=str, default='no', help="['vllm', 'api']")
+    parser.add_argument("--load_mode", type=str, default=None)
     parser.add_argument("--model", type=str, help="Model to use")
     parser.add_argument("--num_gpus", default=1, type=int)
     parser.add_argument("--temperature", type=float, default=0, help="Temperature for decoding")

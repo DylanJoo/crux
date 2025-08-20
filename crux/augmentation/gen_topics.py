@@ -52,8 +52,8 @@ def main(
     # Load the model or setup the API
     if args.load_mode == 'litellm':
         from ..llm.litellm_api import LLM
-    else:
-        from ..llm.vllm_api import LLM
+    if args.load_mode == 'vllm':
+        from ..llm.vllm_async import LLM
     llm = LLM(
         model=args.model,
         temperature=args.temperature,
