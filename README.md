@@ -1,32 +1,29 @@
+# Controlled Retrieval-augmented Context Evaluation for Long-form RAG
+
 ### Installation
-- Environmet (recommend to use container + python venv)
+- Install crux from source
+```shell
+git clone https://github.com/DylanJoo/crux
+cd crux
+uv pip install -e .
 ```
-conda create -n crux python=3.10
-conda activate crux
-conda install -c conda-forge openjdk=21 maven -y    
-```
+- Prerequisite (recommend to use container + python venv)
+TBD
 
-- Packages
-```
-python -m venv myenv --system-site-packages
+### Available Evaluation Data
+1. CRUX-MDS (Multi-document summarization)
+The CRUX evaluation datasets were first built upon multi-document summarization as their controllability. We use Multi-News and DUC04 for creating the evaluation dataset.
 
-```
+2. CRUX-TREC
+In addition to MDS, we add TREC-style report generation task: NeuCLIR'24 and BioGen'24 as another two evaluation datsets.
 
-# CRUX
+> Note that crux-mds is purely synthetic dataset only with our human verficiation. The crux-neuclir and trec-biogen are mostly done by human annotators (See details below)
 
-### Synthetic datasets
-- CRUX-MDS: [MultiNew](), CRUX-[DUC'04]()
-- CRUX-NeuCLIR-ReportGen
-- CRUX-Researchy
+### Components
+There are a few required components.
 
-### Augmented components
-
-
-### CRUX-MDS
-
-### Answerability
+* Answerability
 Here is an example command to obtain sub-question scores:
-
 ```shell
 python -m crux.augmentation.gen_ratings \
     --shard_dir <crux_dir> --shard_size 1000 \
