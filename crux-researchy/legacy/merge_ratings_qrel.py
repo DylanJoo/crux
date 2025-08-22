@@ -54,7 +54,7 @@ def load_offload_jsonl(ratings, offload_dir):
 
 def main(args):
     # Get input and outputs
-    offload_dir="/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.0-1_part-x*"
+    offload_dir="/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.qrel"
     output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.qrel.jsonl"
 
     # Data 

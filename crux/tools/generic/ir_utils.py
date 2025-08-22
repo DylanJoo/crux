@@ -5,7 +5,6 @@ from collections import defaultdict, OrderedDict
 import json
 from tqdm import tqdm
 import ir_measures
-# import pandas as pd
 import math
 
 def load_run_or_qrel(path, topk=10, threshold=3, threshold_score=-math.inf):
@@ -94,32 +93,32 @@ def load_diversity_qrels(path):
     # return pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
     return ir_measures.read_trec_qrels(path)
 
-def load_topics(path, debug=None):
-    topics = {}
-    if path.endswith('tsv'):
-        with open(path, 'r') as f:
-            for i, line in enumerate(f):
-                qid, qtext = line.split('\t')
-                topics[str(qid.strip())] = qtext.strip()
-                
-                if (i+1) == debug:
-                    break
-    if path.endswith('jsonl'):
-        with open(path, 'r') as f:
-            for i, line in enumerate(f):
-                data = json.loads(line.strip())
-                topics[data['example_id']] = data['topic'].strip()
-                if (i+1) == debug:
-                    break
-    return topics
+# def load_topics(path, debug=None):
+#     topics = {}
+#     if path.endswith('tsv'):
+#         with open(path, 'r') as f:
+#             for i, line in enumerate(f):
+#                 qid, qtext = line.split('\t')
+#                 topics[str(qid.strip())] = qtext.strip()
+#                 
+#                 if (i+1) == debug:
+#                     break
+#     if path.endswith('jsonl'):
+#         with open(path, 'r') as f:
+#             for i, line in enumerate(f):
+#                 data = json.loads(line.strip())
+#                 topics[data['example_id']] = data['topic'].strip()
+#                 if (i+1) == debug:
+#                     break
+#     return topics
 
-def load_reports(path):
-    topics = {}
-    with open(path, 'r') as f:
-        for i, line in enumerate(f):
-            data = json.loads(line.strip())
-            topics[data['example_id']] = data['report'].strip()
-    return topics
+# def load_reports(path):
+#     topics = {}
+#     with open(path, 'r') as f:
+#         for i, line in enumerate(f):
+#             data = json.loads(line.strip())
+#             topics[data['example_id']] = data['report'].strip()
+#     return topics
 
 def prepreocess(texts):
     pattern = re.compile(r"^(\d+)*\.")
@@ -129,13 +128,13 @@ def prepreocess(texts):
     texts = re.sub(pattern, '', texts)
     return texts     
 
-def load_questions(path):
-    questions = {}
-    with open(path, 'r') as f:
-        for i, line in enumerate(f):
-            data = json.loads(line.strip())
-            questions[data.pop('example_id')] = [prepreocess(q) for q in data['questions']]
-    return questions
+# def load_questions(path):
+#     questions = {}
+#     with open(path, 'r') as f:
+#         for i, line in enumerate(f):
+#             data = json.loads(line.strip())
+#             questions[data.pop('example_id')] = [prepreocess(q) for q in data['questions']]
+#     return questions
 
 # def load_runs(path, topk=None, output_score=False): # support .trec file only
 #     run_dict = defaultdict(list)

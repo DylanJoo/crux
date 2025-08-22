@@ -39,8 +39,8 @@ def main(args):
     # Get input and outputs
     # /exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.*qwen*
     input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-    # input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-    offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.qwen0.6b-top10"
+    # offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.qwen0.6b-top10"
+    offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.top20"
     output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
 
     # Data 

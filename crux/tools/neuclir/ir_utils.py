@@ -12,24 +12,26 @@ from ir_measures import Qrel
 from tqdm import tqdm
 import pandas as pd
 
-def batch_iterator(iterable, size=1, return_index=False):
-    l = len(iterable)
-    for ndx in range(0, l, size):
-        if return_index:
-            yield (ndx, min(ndx + size, l))
-        else:
-            yield iterable[ndx : min(ndx + size, l)]
+# def load_diversity_qrels(path: str) -> list:
+#     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
+#
+#     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
+#
+#     return diversity_qrels
 
+def load_topic(path='neuclir24-test-request.jsonl'):
+    topics = {}
+    with open(path, "r") as f:
+        for i, line in enumerate(f):
+            item = json.loads(line.strip())
+            title = item['title']
+            backgrpund = item["background"]
+            problem_statement = item["problem_statement"]
+            topics[str(data["request_id"])] = title + " " + problem_statement
+    return topics
 
-def load_diversity_qrels(path: str) -> list:
-    qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
-
-    diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
-
-    return diversity_qrels
-    # return ir_measures.read_trec_qrels(path)
-
-def load_query(path, fields=['title', 'problem_statement']):
+# def load_query(path, fields=['title', 'problem_statement']):
+def load_queries(path, fields=['title', 'problem_statement']):
     queries = {}
     with open(path, "r") as f:
         for line in f:
@@ -37,28 +39,28 @@ def load_query(path, fields=['title', 'problem_statement']):
             queries[data.pop('request_id')] = " ".join([data[field] for field in fields])
     return queries
 
-# dylan: try to separate the loading function for NeuCLIR-IR and NeuCLIR-RAG tasks
-def load_topic(path):
-    """title + description as query for search"""
-    topics = {}
-    if path.endswith("tsv"):
-        with open(path, "r") as f:
-            for i, line in enumerate(f):
-                qid, qtext = line.split("\t")
-                topics[str(qid.strip())] = qtext.strip()
+# def load_subtopics_human(path,
+#                          raw_topics=None,
+#                          create_new_subtopics=False):
+#     # [TODO] AND/OR in the pipeline
+#     files = [f for f in glob.glob(f"{path}/nuggets_*json")]
+#     subquestions = {}
+#     for file in files:
+#         match = re.search(r"nuggets_(\d+)\.json$", file)
+#         qid = str(match.group(1))
+#         data = json.load(open(file, "r"))
+#         subquestions[qid] = list(data.keys())
+#     return subquestions
 
-                if (i + 1) == debug:
-                    break
-    if path.endswith("jsonl"):
-        with open(path, "r") as f:
-            for i, line in enumerate(f):
-                data = json.loads(line.strip())
-
-                title = data["topics"][0]["topic_title"]
-                desc = data["topics"][0]["topic_description"]
-                topics[str(data["topic_id"]).strip()] = title + " " + desc
-    return topics
-
+def load_subtopics(
+    subset='neuclir', split='test', 
+    root_dir='/exp/scale25/artifacts/crux'
+):
+    file = os.path.join(root_dir, f"crux-{subset}", "subtopics/subquestions.human.jsonl")
+    subquestions = {}
+    items = [json.loads(l) for l in open(file).readlines()]
+    subquestions.update({i['id']: i['subquestions'] for i in items})
+    return subquestions
 
 def prepreocess(texts):
     pattern = re.compile(r"^(\d+)*\.")
@@ -68,49 +70,26 @@ def prepreocess(texts):
     texts = re.sub(pattern, "", texts)
     return texts
 
-def load_subtopics_human(path,
-                         args, 
-                         raw_topics=None,
-                         create_new_subtopics=False):
-    # [TODO] AND/OR in the pipeline
-    files = [f for f in glob.glob(f"{path}/nuggets_*json")]
-    subquestions = {}
-    for file in files:
-        match = re.search(r"nuggets_(\d+)\.json$", file)
-        qid = str(match.group(1))
-        data = json.load(open(file, "r"))
-        subquestions[qid] = list(data.keys())
-        # subanswer[id] = [subanswer for subanswer in subquestions[id]]
+# def load_ratings(path):
+#     ratings = defaultdict(lambda: defaultdict(lambda: None))
+#     contexts = defaultdict(lambda: None)
+#     if os.path.exists(path):
+#         with open(path, 'r') as f:
+#             for line in f:
+#                 data = json.loads(line.strip())
+#                 id = data['id']
+#                 ratings[id].update({data['pid']: data['rating']})
+#     return ratings
 
-    if create_new_subtopics:
-        extra_subtopics = generate_complementary_subtopics(args, raw_topics, subquestions)
-        for qid in extra_subtopics:
-            subquestions[qid].extend(extra_subtopics[qid])
+# def load_subtopics(args, topic):
+#     # TODO: replace with code from the auto-nuggetization team
+#     subtopics = generate_subtopics(args, topic)
+#     return subtopics
 
-    return subquestions
-
-def load_ratings(path):
-    ratings = defaultdict(lambda: defaultdict(lambda: None))
-    contexts = defaultdict(lambda: None)
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                id = data['id']
-                ratings[id].update({data['pid']: data['rating']})
-    return ratings
-
-
-def load_subtopics(args, topic):
-    # TODO: replace with code from the auto-nuggetization team
-    subtopics = generate_subtopics(args, topic)
-    return subtopics
-
-async def async_load_subtopics(args, topic):
-    # [TODO] replace with code from the auto-nuggetization team
-    subtopics = await async_generate_subtopics(args, topic)
-    return subtopics
-
+# async def async_load_subtopics(args, topic):
+#     # [TODO] replace with code from the auto-nuggetization team
+#     subtopics = await async_generate_subtopics(args, topic)
+#     return subtopics
 
 def load_corpus_online(path=None):
     class get_content:

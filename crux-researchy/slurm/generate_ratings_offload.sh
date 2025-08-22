@@ -5,7 +5,7 @@
 #SBATCH --mem=32G
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --array=0-100%5
+#SBATCH --array=85-100%5
 #SBATCH --time=02:00:00
 #SBATCH --output=logs/%x-%j.out
 
@@ -26,6 +26,4 @@ python3 -m crux.augmentation.gen_ratings_offload \
     --run_path $root_dir/crux-researchy/runs/run.researchy-init-q.bm25+qwen3.clueweb22-b.txt \
     --top_k 20 \
     --shard $SLURM_ARRAY_TASK_ID --total_shards 100 \
-    --batch_size 64 \
-    --load_mode litellm
-
+    --batch_size 64
