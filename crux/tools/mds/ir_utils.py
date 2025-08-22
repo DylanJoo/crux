@@ -8,6 +8,7 @@ from .text_utils import (
     flatten_and_normalize,
     maybe_chunking
 )
+from ..generic.ir_utils import load_corpus
 
 # TODO: consider update the hf dataset with subotopics
 def load_topic(
@@ -77,6 +78,17 @@ def load_reports(subset='multi_news', split='test'):
     # 
     reports = {}
     for example in ds:
-        reports[example['id']] = example['summary']
+        reports[f"{example['id']}:report"] = example['summary']
     return reports
 
+# NOTE: relevant document pool is known as itscontrollability
+def get_qrel(root_dir='/users/judylan1/temp/datasets/crux/crux-mds-corpus'):
+    corpus = load_corpus(root_dir)
+    qrel = {}
+    for docid in corpus:
+        qid = docid.split(":")[0]
+        if qid not in qrel:
+            qrel[qid] = []
+        qrel[qid].append(docid)
+
+    return qrel

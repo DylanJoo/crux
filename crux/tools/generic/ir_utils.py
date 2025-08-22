@@ -35,7 +35,7 @@ def load_corpus(path):
     if not os.path.isdir(path):
         files = [path]
     else:
-        files = glob(path+"/*")
+        files = glob(path+"/*jsonl")
 
     for file in files:
         with open(file, 'r') as f:
@@ -50,10 +50,17 @@ def load_corpus(path):
 
 def load_ratings(path):
     ratings = defaultdict(lambda: defaultdict(lambda: None))
-    with open(path, 'r') as f:
-        for line in f:
-            data = json.loads(line.strip())
-            ratings[data['id']].update({data['docid']: data['rating']})
+
+    if not os.path.isdir(path):
+        files = [path]
+    else:
+        files = glob(path+"/*jsonl")
+
+    for path in files:
+        with open(path, 'r') as f:
+            for line in f:
+                data = json.loads(line.strip())
+                ratings[data['id']].update({data['docid']: data['rating']})
     return ratings
 
 def load_searcher(path, dense=False):

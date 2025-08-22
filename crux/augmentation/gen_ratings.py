@@ -50,7 +50,7 @@ def main(
     ir_utils = importlib.import_module(f"crux.tools.{dataset}.ir_utils", package=__name__)
     all_topic = ir_utils.load_topic() if subset is None else ir_utils.load_topic(subset=subset)
     all_subquestions = ir_utils.load_subtopics() if subset is None else ir_utils.load_subtopics(subset=subset)
-    run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=3, threshold_score=0.6) 
+    run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=1)
     corpus = load_corpus(args.corpus)
     # all_reports = ir_utils.load_report(subset=subset, split=split)
 
