@@ -6,7 +6,7 @@ The data and the crux python package will be released soon.
 
 
 ### Installation
-- Install crux from source
+- Install crux from source (Beta version)
 ```shell
 git clone https://github.com/DylanJoo/crux
 cd crux
