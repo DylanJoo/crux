@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH --job-name=collect-cw22
+#SBATCH --job-name=debug-cw22
 #SBATCH --cpus-per-task=32
 #SBATCH --partition cpu
 #SBATCH --mem=32G
@@ -18,5 +18,5 @@ cd ~/crux/crux-researchy/
 
 python3 researchy-corpus.py \
     --shard $SLURM_ARRAY_TASK_ID --num_shards 10 \
-    --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-gpt4-q_bm25.clueweb22-b.txt \
-    --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v2/doc00.jsonl
+    --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/debug.run \
+    --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/qrel/doc00.jsonl

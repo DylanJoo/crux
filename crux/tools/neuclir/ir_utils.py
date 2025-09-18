@@ -8,18 +8,15 @@ from collections import defaultdict, OrderedDict
 import json
 import pickle
 
-from ir_measures import Qrel
 from tqdm import tqdm
 import pandas as pd
 
 # def load_diversity_qrels(path: str) -> list:
 #     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
-#
 #     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
-#
 #     return diversity_qrels
 
-def load_topic(path='neuclir24-test-request.jsonl'):
+def load_topic(path='/exp/scale25/artifacts/crux/crux-neuclir/qrel/neuclir24-test-request.qrel'):
     topics = {}
     with open(path, "r") as f:
         for i, line in enumerate(f):
@@ -30,7 +27,6 @@ def load_topic(path='neuclir24-test-request.jsonl'):
             topics[str(data["request_id"])] = title + " " + problem_statement
     return topics
 
-# def load_query(path, fields=['title', 'problem_statement']):
 def load_queries(path, fields=['title', 'problem_statement']):
     queries = {}
     with open(path, "r") as f:

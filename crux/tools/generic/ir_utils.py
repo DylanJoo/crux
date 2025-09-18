@@ -9,6 +9,9 @@ import math
 
 def load_run_or_qrel(path, topk=10, threshold=3, threshold_score=-math.inf):
     run_dict = defaultdict(dict)
+    if os.path.exists(path) is False:
+        return run_dict
+
     with open(path, "r") as f:
         for i, line in enumerate(f):
             try: 

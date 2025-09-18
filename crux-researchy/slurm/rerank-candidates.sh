@@ -14,6 +14,6 @@
 source ~/.bashrc
 enter_conda
 conda activate crux
-cd ~/crux-scale/crux-researchy
+cd ~/crux/crux-researchy
 
 python rerank-candidates.py --batch_size 100 --shard $SLURM_ARRAY_TASK_ID --total_shards 20

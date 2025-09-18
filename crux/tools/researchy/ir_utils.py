@@ -81,11 +81,12 @@ def create_subset_corpus(
     return corpus
 
 def get_qrel():
-    ds = load_dataset("corbyrosset/researchy_questions")['train']
     qrel = {}
-    for example in ds:
-        rel_docs = [item['CluewebURLHash'] for item in example['DocStream']]
-        qrel[example['id']] = {doc: 1 for doc in rel_docs}
+    for subset in ['train', 'test']:
+        ds = load_dataset("corbyrosset/researchy_questions")[subset]
+        for example in ds:
+            rel_docs = [item['CluewebURLHash'] for item in example['DocStream']]
+            qrel[example['id']] = {doc: 1 for doc in rel_docs}
     return qrel
 
 def load_corpus(**kwargs):
