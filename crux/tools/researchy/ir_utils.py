@@ -1,3 +1,4 @@
+import os
 import gzip
 import json
 from glob import glob
@@ -169,3 +170,14 @@ def sort_and_truncate(run, topk=None):
         truncated_run[qid] = sorted_docs
     return truncated_run
 
+def load_judgements(dir):
+    judgements = defaultdict(lambda: defaultdict(lambda: None))
+    files = glob(os.path.join(dir, "*jsonl"))
+
+    for file in tqdm(files):
+        with open(file, 'r') as f:
+            for line in f:
+                data = json.loads(line.strip())
+                id = data['id']
+                judgements[id].update({data['docid']: data['rating']})
+    return judgements

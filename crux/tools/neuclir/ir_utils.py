@@ -24,7 +24,7 @@ def load_topic(path='/exp/scale25/artifacts/crux/crux-neuclir/qrel/neuclir24-tes
             title = item['title']
             backgrpund = item["background"]
             problem_statement = item["problem_statement"]
-            topics[str(data["request_id"])] = title + " " + problem_statement
+            topics[str(item["request_id"])] = title + " " + problem_statement
     return topics
 
 def load_queries(path, fields=['title', 'problem_statement']):
