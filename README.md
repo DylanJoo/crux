@@ -30,7 +30,7 @@ uv pip install -e .
 ```python
 os.environ["CRUX_ROOT"] = "/your_datasets/crux/"
 from crux.tools.mds import load_data
-data = load_data(subset="duc04", split='test')  # or "subet=multi_news"
+data = load_data(subset="duc04", split="test")  # or "subet=multi_news"
 ```
 
 ### Evaluation
@@ -41,20 +41,20 @@ TBD
 ### Example of the first example in DUC04 test set
 ```json
 {
-  'id': 'duc04-test-0',
-  'topic': 'Prepare a report on the violence and intimidation faced by abortion ...',
-  'subtopics': [
-      "Who was the mainstay of Buffalo's only abortion clinic that was slain?",
-      'What is the FBI looking for James Kopp for?',
+  "id": "duc04-test-0",
+  "topic": "Prepare a report on the violence and intimidation faced by abortion ...",
+  "subtopics": [
+      "Who was the mainstay of Buffalo"s only abortion clinic that was slain?",
+      "What is the FBI looking for James Kopp for?",
       ...,
-      'Who is Rev. Norman Weslin, and what is his role in the anti-abortion movement?',
-      'What imperils the widespread availability of abortion procedures besides anti-abortion violence?'
+      "Who is Rev. Norman Weslin, and what is his role in the anti-abortion movement?",
+      "What imperils the widespread availability of abortion procedures besides anti-abortion violence?"
   ],
-    'report': "Dr. Barnett Slepian, the mainstay of Buffalo's only abortion clinic, ...",
-    'qrel': {
-        'duc04-test-0:0#0': 1.0,
-        'duc04-test-0:0#2': 1.0,
+    "report": "Dr. Barnett Slepian, the mainstay of Buffalo"s only abortion clinic, ...",
+    "qrel": {
+        "duc04-test-0:0#0": 1.0,
+        "duc04-test-0:0#2": 1.0,
         ...
-        'duc04-test-0:18#56': 1.0
+        "duc04-test-0:18#56": 1.0
     }
 ```
