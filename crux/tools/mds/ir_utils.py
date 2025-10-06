@@ -10,7 +10,8 @@ from .text_utils import (
     maybe_chunking
 )
 
-root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
+# root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
+root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
 
 def load_data(subset='multi_news', split='test'):
     topic = load_topic(subset, split)

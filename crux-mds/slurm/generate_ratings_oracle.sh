@@ -2,9 +2,8 @@
 #SBATCH --job-name=crux-mds-rating
 #SBATCH --output=logs/crux.out.%j
 #SBATCH --error=logs/crux.err.%j
-#SBATCH --partition=small-g         # partition name
+#SBATCH --partition=dev-g         # partition name
 #SBATCH --ntasks-per-node=1         # 8 MPI ranks per node, 16 total (2x8)
-#SBATCH --array=0-10%2
 #SBATCH --nodes=1                   # Total number of nodes 
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-node=8           # Allocate one gpu per MPI rank
@@ -33,8 +32,7 @@ python3 -m crux.augmentation.gen_ratings \
     --max_model_len 8196 \
     --batch_size 32 \
     --load_mode vllm \
-    --run_path $root_dir/crux-mds-$subset/qrels/qrels.txt \
-    --corpus $root_dir/crux-mds-corpus \
+    --corpus $root_dir/crux-mds-$subset/report \
 
 subset=multi_news
 python3 -m crux.augmentation.gen_ratings \
@@ -47,6 +45,4 @@ python3 -m crux.augmentation.gen_ratings \
     --max_model_len 8196 \
     --batch_size 64 \
     --load_mode vllm \
-    --run_path $root_dir/crux-mds-$subset/qrels/qrels.txt \
-    --corpus $root_dir/crux-mds-corpus \
-    --shard $SLURM_ARRAY_TASK_ID --total_shards 10
+    --corpus $root_dir/crux-mds-$subset/report

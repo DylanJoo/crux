@@ -50,7 +50,10 @@ def main(
     ir_utils = importlib.import_module(f"crux.tools.{dataset}.ir_utils", package=__name__)
     all_topic = ir_utils.load_topic() if subset is None else ir_utils.load_topic(subset=subset)
     all_subquestions = ir_utils.load_subtopics() if subset is None else ir_utils.load_subtopics(subset=subset)
-    run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=1)
+    if args.run_path is None:
+        run = {qid: {qid: 1} for qid in all_topic}
+    else:
+        run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=1)
     corpus = load_corpus(args.corpus)
     # all_reports = ir_utils.load_report(subset=subset, split=split)
 
@@ -75,6 +78,9 @@ def main(
         qids = sorted(qids)
         shard_size = len(qids) // args.total_shards + 1
         qids = qids[args.shard * shard_size: (args.shard + 1) * shard_size]
+
+    if args.run_path is None:
+        args.shard = 'oracle'
 
     output_path = os.path.join(
         args.output_dir, 
