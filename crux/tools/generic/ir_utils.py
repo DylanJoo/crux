@@ -1,3 +1,4 @@
+import logging
 import re
 import os
 from glob import glob
@@ -7,11 +8,14 @@ from tqdm import tqdm
 import ir_measures
 import math
 
-def load_run_or_qrel(path, topk=10, threshold=3, threshold_score=-math.inf):
+logger = logging.getLogger(__name__)
+
+def load_run_or_qrel(path, topk=1000, threshold=1):
     run_dict = defaultdict(dict)
     if os.path.exists(path) is False:
         return run_dict
 
+    logger.info(f"Loading topk={topk}, threshold={threshold}...")
     with open(path, "r") as f:
         for i, line in enumerate(f):
             try: 
@@ -75,22 +79,22 @@ def load_searcher(path, dense=False):
         searcher.set_bm25(k1=0.9, b=0.4)
     return searcher
 
-def batch_iterator(iterable, size=1, return_index=False):
-    l = len(iterable)
-    for ndx in range(0, l, size):
-        if return_index:
-            yield (ndx, min(ndx + size, l))
-        else:
-            yield iterable[ndx:min(ndx + size, l)]
+# def batch_iterator(iterable, size=1, return_index=False):
+#     l = len(iterable)
+#     for ndx in range(0, l, size):
+#         if return_index:
+#             yield (ndx, min(ndx + size, l))
+#         else:
+#             yield iterable[ndx:min(ndx + size, l)]
 
-def load_qrels(path, threshold=1):
-    data = defaultdict(dict)
-    with open(path) as f:
-        for line in f:
-            qid, _, docid, score = line.strip().split()
-            if int(score) >= threshold:
-                data[qid].update({docid: int(score)})
-    return data
+# def load_qrels(path, threshold=1):
+#     data = defaultdict(dict)
+#     with open(path) as f:
+#         for line in f:
+#             qid, _, docid, score = line.strip().split()
+#             if int(score) >= threshold:
+#                 data[qid].update({docid: int(score)})
+#     return data
 
 def load_diversity_qrels(path):
     # return pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])

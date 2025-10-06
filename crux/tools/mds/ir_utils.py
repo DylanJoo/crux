@@ -2,19 +2,38 @@ import os
 import json
 from glob import glob
 from datasets import load_dataset, load_from_disk
+import pandas as pd
 from .text_utils import (
     parse_mds,
     normalize_list,
     flatten_and_normalize,
     maybe_chunking
 )
-from ..generic.ir_utils import load_corpus
+
+root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
+
+def load_data(subset='multi_news', split='test'):
+    topic = load_topic(subset, split)
+    subtopics = load_subtopics(subset, split)
+    report = load_report(subset, split)
+    qrel = get_qrel(subset, split)
+
+    data_list = []
+    for id in topic:
+        data_list.append({
+            'id': id,
+            'topic': topic[id],
+            'subtopics': subtopics.get(id, None),
+            'report': report.get(id, None),
+            'qrel': qrel.get(id, None)
+        })
+
+    df = pd.DataFrame(data_list).dropna(axis=0)
+    df = df.set_index('id')
+    return df
 
 # TODO: consider update the hf dataset with subotopics
-def load_topic(
-    subset='multi_news', split='test', 
-    root_dir='/users/judylan1/temp/datasets/crux'
-):
+def load_topic(subset='multi_news', split='test'):
     path = os.path.join(root_dir, f"crux-mds-{subset}", "topic/*jsonl")
     topic = {}
     for file in glob(path):
@@ -23,10 +42,7 @@ def load_topic(
     return topic
 
 # TODO: consider update the hf dataset with subotopics
-def load_subtopics(
-    subset='multi_news', split='test', 
-    root_dir='/users/judylan1/temp/datasets/crux'
-):
+def load_subtopics(subset='multi_news', split='test'):
     path = os.path.join(root_dir, f"crux-mds-{subset}", "subtopics/*jsonl")
     subquestions = {}
     for file in glob(path):
@@ -37,7 +53,7 @@ def load_subtopics(
 def load_multi_news(load_from_source=False):
     if load_from_source:
         from huggingface_hub import snapshot_download
-        repo_path = snapshot_download(repo_id="DylanJHJ/crux", repo_type='dataset')
+        repo_path = snapshot_download(repo_id="DylanJHJ/crux-mds", repo_type='dataset')
         ds = load_from_disk(repo_path+'/sources/multi_news')
         ds = ds.map(lambda x: {"long_document": parse_mds(x['document'])})
         ds = ds.filter(lambda x: len(x['long_document']) >=2 )
@@ -46,13 +62,13 @@ def load_multi_news(load_from_source=False):
             ds[split] = ds[split].add_column("id", [f"multi_news-{split}-{i}" for i in range(len(ds[split]))])
         ds = ds.select_columns(['id', 'summary', 'document', 'long_document'])
     else:
-        ds = load_dataset('DylanJHJ/crux-mds-multi_news')
+        ds = load_dataset('DylanJHJ/crux-mds-multi_news-source')
     return ds
 
 def load_duc04(load_from_source=False):
     if load_from_source:
         from huggingface_hub import snapshot_download
-        repo_path = snapshot_download(repo_id="DylanJHJ/crux", repo_type='dataset')
+        repo_path = snapshot_download(repo_id="DylanJHJ/crux-mds", repo_type='dataset')
         ds = load_from_disk(repo_path+'/sources/duc04')['train']
         ds = ds.rename_column('context', 'long_document')
         ds = ds.map(lambda x: {
@@ -67,10 +83,10 @@ def load_duc04(load_from_source=False):
         ds = ds.add_column("task_id", temp_ids)
         ds = ds.select_columns(['id', 'summary', 'document', 'long_document', 'task_id'])
     else:
-        ds = load_dataset("DylanJHJ/crux-mds-duc04")['train']
+        ds = load_dataset("DylanJHJ/crux-mds-duc04-source")['train']
     return ds
 
-def load_reports(subset='multi_news', split='test'):
+def load_report(subset='multi_news', split='test'):
     if subset == 'multi_news':
         ds = load_multi_news()[split]
     if subset == 'duc04':
@@ -78,17 +94,18 @@ def load_reports(subset='multi_news', split='test'):
     # 
     reports = {}
     for example in ds:
-        reports[f"{example['id']}:report"] = example['summary']
+        reports[f"{example['id']}"] = example['summary']
     return reports
 
-# NOTE: relevant document pool is known as itscontrollability
-def get_qrel(root_dir='/users/judylan1/temp/datasets/crux/crux-mds-corpus'):
-    corpus = load_corpus(root_dir)
-    qrel = {}
-    for docid in corpus:
-        qid = docid.split(":")[0]
-        if qid not in qrel:
-            qrel[qid] = []
-        qrel[qid].append(docid)
-
+# NOTE: the split is not used.
+def get_qrel(subset='multi_news', split='test', tau=3):
+    from ..generic.ir_utils import load_run_or_qrel
+    path = os.path.join(root_dir, f"crux-mds-{subset}", f"qrels/div_qrels-tau{tau}.txt")
+    qrel = load_run_or_qrel(path, topk=1000, threshold=1)
     return qrel
+
+def get_rating(subset='multi_news', split='test'):
+    from ..generic.ir_utils import load_ratings
+    dir = os.path.join(root_dir, f"crux-mds-{subset}/judge")
+    ratings = load_ratings(dir)
+    return ratings
