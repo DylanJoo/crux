@@ -5,10 +5,9 @@
 #SBATCH --partition=dev-g         # partition name
 #SBATCH --ntasks-per-node=1         # 8 MPI ranks per node, 16 total (2x8)
 #SBATCH --nodes=1                   # Total number of nodes 
-#SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-node=8           # Allocate one gpu per MPI rank
-#SBATCH --mem=120G
-#SBATCH --time=0-01:00:00           # Run time (d-hh:mm:ss)
+#SBATCH --mem=32G
+#SBATCH --time=0-02:00:00           # Run time (d-hh:mm:ss)
 #SBATCH --account=project_465001640 # Project for billing
 
 # Load the environment

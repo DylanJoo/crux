@@ -143,6 +143,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--dataset", type=str, default=None, help="Path to the dataset file")
     parser.add_argument("--subset", type=str, default=None, help="Subset of the dataset to use")
+    parser.add_argument("--split", type=str, default=None, help="Split of the dataset to use")
     parser.add_argument("--output_dir", type=str, help="directory for the output result")
     parser.add_argument("--shard", type=int, default=0, help="the n-th shard")
     parser.add_argument("--total_shards", type=int, default=1, help="Total number of shards")
@@ -177,5 +178,5 @@ if __name__ == "__main__":
         dataset=args.dataset,
         load_mode=args.load_mode,
         subset=args.subset,
-        split='test'
+        split=args.split
     )
