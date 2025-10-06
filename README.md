@@ -1,41 +1,58 @@
 # Controlled Retrieval-augmented Context Evaluation for Long-form RAG
 
 Update: 
-- 2025-09-18: We are now including other new datasets in addition to DUC04 and Multi-News. 
-The data and the crux python package will be released soon.
+- 2025-10-06: Update the loading functions We have released the code and data for CRUX v0.4.0.
 
+### Preparation
+- Download datasets
+```shell
+cd /your_datasets/
+git lfs install
+git clone https://huggingface.co/datasets/DylanJHJ/crux
+export CRUX_ROOT=/your_datasets/crux
+```
 
-### Installation
-- Install crux from source (Beta version)
+- Install crux loading from source (v0.4.0)
+We recommend to use the conda environment.
+```shell
+conda install -f environment.yaml
+```
+Then install crux from source:
 ```shell
 git clone https://github.com/DylanJoo/crux
 cd crux
 uv pip install -e .
 ```
-- Prerequisite (recommend to use container + python venv)
-TBD
 
-### Example
+### Data loading 
+```python
+os.environ["CRUX_ROOT"] = "/your_datasets/crux/"
+from crux.tools.mds import load_data
+data = load_data(subset="duc04", split='test')  # or "subet=multi_news"
+```
+
+### Evaluation
+```python
+TBD
+```
+
+### Example of the first example in DUC04 test set
 ```json
 {
-  "id": "example_id",
-  "topic": "What is the impact of climate change on polar bears?",
-  "questions": [
-    "How does climate change affect polar bear habitats?",
-    "What are the main threats to polar bears due to climate change?"
-    ... (more questions)
+  'id': 'duc04-test-0',
+  'topic': 'Prepare a report on the violence and intimidation faced by abortion ...',
+  'subtopics': [
+      "Who was the mainstay of Buffalo's only abortion clinic that was slain?",
+      'What is the FBI looking for James Kopp for?',
+      ...,
+      'Who is Rev. Norman Weslin, and what is his role in the anti-abortion movement?',
+      'What imperils the widespread availability of abortion procedures besides anti-abortion violence?'
   ],
-  "passages": [
-    {
-      "contents": "Climate change is causing the Arctic ice to melt, which is crucial for polar bears.",
-      "rating": 5
-    },
-    {
-      "text": "Rising temperatures are leading to habitat loss for polar bears.",
-      "rating": 4
+    'report': "Dr. Barnett Slepian, the mainstay of Buffalo's only abortion clinic, ...",
+    'qrel': {
+        'duc04-test-0:0#0': 1.0,
+        'duc04-test-0:0#2': 1.0,
+        ...
+        'duc04-test-0:18#56': 1.0
     }
-  ]
-}
 ```
- 
-
