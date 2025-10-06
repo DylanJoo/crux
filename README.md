@@ -1,7 +1,9 @@
 # Controlled Retrieval-augmented Context Evaluation for Long-form RAG
 
-Update: 
-- 2025-10-06: Update the loading functions We have released the code and data for CRUX v0.4.0.
+### Update
+- 2025-10-06: Release data for crux-mds-duc04.
+- TBD: data for crux-mds-multi_news. 
+- TBD: evaluation function.
 
 ### Preparation
 - Download datasets
