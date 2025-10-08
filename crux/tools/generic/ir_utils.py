@@ -5,7 +5,6 @@ from glob import glob
 from collections import defaultdict, OrderedDict
 import json
 from tqdm import tqdm
-import ir_measures
 import math
 
 logger = logging.getLogger(__name__)
@@ -27,6 +26,14 @@ def load_run_or_qrel(path, topk=1000, threshold=1):
                 if int(rel) >= threshold:
                     run_dict[qid].update({docid: float(rel)})
     return run_dict
+
+def load_diversity_qrel(path):
+    import pandas as pd
+    df = pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
+    print(df)
+    return df
+    # import ir_measures
+    # return ir_measures.read_trec_qrels(path)
 
 def load_corpus(path):
     from .text_utils import normalize_doc
@@ -69,55 +76,6 @@ def load_ratings(path):
                 ratings[data['id']].update({data['docid']: data['rating']})
     return ratings
 
-def load_searcher(path, dense=False):
-    if dense:
-        from pyserini.search.faiss import FaissSearcher
-        searcher = FaissSearcher(path, None)
-    else:
-        from pyserini.search.lucene import LuceneSearcher
-        searcher = LuceneSearcher(path)
-        searcher.set_bm25(k1=0.9, b=0.4)
-    return searcher
-
-# def batch_iterator(iterable, size=1, return_index=False):
-#     l = len(iterable)
-#     for ndx in range(0, l, size):
-#         if return_index:
-#             yield (ndx, min(ndx + size, l))
-#         else:
-#             yield iterable[ndx:min(ndx + size, l)]
-
-def load_diversity_qrel(path):
-    # return pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
-    return ir_measures.read_trec_qrels(path)
-
-# def load_topics(path, debug=None):
-#     topics = {}
-#     if path.endswith('tsv'):
-#         with open(path, 'r') as f:
-#             for i, line in enumerate(f):
-#                 qid, qtext = line.split('\t')
-#                 topics[str(qid.strip())] = qtext.strip()
-#                 
-#                 if (i+1) == debug:
-#                     break
-#     if path.endswith('jsonl'):
-#         with open(path, 'r') as f:
-#             for i, line in enumerate(f):
-#                 data = json.loads(line.strip())
-#                 topics[data['example_id']] = data['topic'].strip()
-#                 if (i+1) == debug:
-#                     break
-#     return topics
-
-# def load_reports(path):
-#     topics = {}
-#     with open(path, 'r') as f:
-#         for i, line in enumerate(f):
-#             data = json.loads(line.strip())
-#             topics[data['example_id']] = data['report'].strip()
-#     return topics
-
 def prepreocess(texts):
     pattern = re.compile(r"^(\d+)*\.")
     texts = re.sub(r"\<q\>|\<\/q\>", "\n", texts)
@@ -126,13 +84,31 @@ def prepreocess(texts):
     texts = re.sub(pattern, '', texts)
     return texts     
 
-# def load_questions(path):
-#     questions = {}
-#     with open(path, 'r') as f:
-#         for i, line in enumerate(f):
-#             data = json.loads(line.strip())
-#             questions[data.pop('example_id')] = [prepreocess(q) for q in data['questions']]
-#     return questions
+def sort_and_truncate(run, max_k_dict=None):
+    truncated_run = {}
+    for qid, docid_scores in run.items():
+        topk = max_k_dict[qid]
+        sorted_docs = dict(sorted(docid_scores.items(), key=lambda x: x[1], reverse=True)[:topk])
+        truncated_run[qid] = sorted_docs
+    return truncated_run
+
+def binarize(qrels):
+    binarized_qrels = {}
+    for qid, docid_scores in qrels.items():
+        docid_scores = {docid: 1 for docid, score in docid_scores.items()}
+        binarized_qrels[qid] = docid_scores
+    return binarized_qrels
+
+# NOTE: These functions are deprecated
+# def load_searcher(path, dense=False):
+#     if dense:
+#         from pyserini.search.faiss import FaissSearcher
+#         searcher = FaissSearcher(path, None)
+#     else:
+#         from pyserini.search.lucene import LuceneSearcher
+#         searcher = LuceneSearcher(path)
+#         searcher.set_bm25(k1=0.9, b=0.4)
+#     return searcher
 
 # def load_runs(path, topk=None, output_score=False): # support .trec file only
 #     run_dict = defaultdict(list)
@@ -154,18 +130,12 @@ def prepreocess(texts):
 #
 #     return sorted_run_dict
 
-def sort_and_truncate(run, max_k_dict=None):
-    truncated_run = {}
-    for qid, docid_scores in run.items():
-        topk = max_k_dict[qid]
-        sorted_docs = dict(sorted(docid_scores.items(), key=lambda x: x[1], reverse=True)[:topk])
-        truncated_run[qid] = sorted_docs
-    return truncated_run
+# def batch_iterator(iterable, size=1, return_index=False):
+#     l = len(iterable)
+#     for ndx in range(0, l, size):
+#         if return_index:
+#             yield (ndx, min(ndx + size, l))
+#         else:
+#             yield iterable[ndx:min(ndx + size, l)]
 
-def binarize(qrels):
-    binarized_qrels = {}
-    for qid, docid_scores in qrels.items():
-        docid_scores = {docid: 1 for docid, score in docid_scores.items()}
-        binarized_qrels[qid] = docid_scores
-    return binarized_qrels
 
