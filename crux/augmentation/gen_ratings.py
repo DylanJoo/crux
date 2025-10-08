@@ -48,7 +48,7 @@ def main(
 
     # Load data-dependent functions 
     ir_utils = importlib.import_module(f"crux.tools.{dataset}.ir_utils", package=__name__)
-    all_topic = ir_utils.load_topic() if subset is None else ir_utils.load_topic(subset=subset)
+    all_topic = ir_utils.load_topic(split=split) if subset is None else ir_utils.load_topic(subset=subset, split=split)
     all_subquestions = ir_utils.load_subtopics() if subset is None else ir_utils.load_subtopics(subset=subset)
     if args.run_path is None:
         run = {qid: {qid: 1} for qid in all_topic}
