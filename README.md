@@ -47,6 +47,20 @@ qrel         {'duc04-test-0:0#0': 1.0, 'duc04-test-0:0#2': ...
 Name: duc04-test-0, dtype: object
 ```
 
+For NeuCLIR, we leave the `report` field empty, as it is not provided in the original dataset.
+```python
+from crux.tools.neuclir import load_data
+data = load_data()
+print(data.iloc[0])
+
+>>> 
+topic        Japan suicide rate COVID-19 I need a report on...
+subtopics    [[How many years has it been since Japan had t...
+report                        No ground-truth report provided.
+qrel         {'ba30498c-9dbf-4b1d-bbfa-bcdca4548b18': 3.0, ...
+Name: 300, dtype: object
+```
+
 ### Evaluation
 ```python
 TBD
