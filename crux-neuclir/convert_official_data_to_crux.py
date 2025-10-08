@@ -20,24 +20,34 @@ for file in glob(os.path.join(nugget_dir, f'nuggets_???.json')):
 
         if type_and_answers[0] == 'OR':
             answers = ()
+
+            evidences_count = 0
             for answer in type_and_answers[1]: # so the list represents acceptable answers
-                answers += (answer,)
                 evidences = type_and_answers[1][answer]
+                answers += (answer,)
+                evidences_count += len(evidences)
 
                 ## debug 
                 if (len(evidences) == 0) or (answer.strip() == ""):
                     print(f"# [{qid}] [QA(OR)] {question}->{answer} [#evidence] {len(evidences)}")
 
-            subquestions_with_answer[qid].append( (question, answers) )
+            if evidences_count > 0: # For OR case, ignore the nugget question, if none of the answers has evidence, 
+                subquestions_with_answer[qid].append( (question, answers) )
 
         if type_and_answers[0] == 'AND': 
+
+            evidences_count = 0
             for answer in type_and_answers[1]: # so the each answer are separated
-                subquestions_with_answer[qid].append( (question, answer) )
                 evidences = type_and_answers[1][answer]
+                subquestions_with_answer[qid].append( (question, answer) )
+                evidences_count += len(evidences)
 
                 ## debug 
                 if (len(evidences) == 0) or (answer.strip() == ""):
-                    print(f"# [{qid}] [QA (AND)] {question}->{answer} [#evidence] {len(evidences)}")
+                    print(f"# [{qid}] [QA(AND)] {question}->{answer} [#evidence] {len(evidences)}")
+
+            if evidences_count < 0: # For AND case, ignore the nugget quesion only when all the evidences of answers are unavilable.
+                print(f"Warning. All answers of this nugget question have no evidences.")
 
 # subquestions
 with open(f'{root_dir}/crux-neuclir/subtopics/subquestions.human.jsonl', 'w') as f:

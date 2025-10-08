@@ -11,12 +11,16 @@ import pickle
 from tqdm import tqdm
 import pandas as pd
 
+# root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
+root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
+
 # def load_diversity_qrels(path: str) -> list:
 #     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
 #     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
 #     return diversity_qrels
 
-def load_topic(path='/exp/scale25/artifacts/crux/crux-neuclir/qrel/neuclir24-test-request.qrel'):
+def load_topic():
+    path = os.path.join(root_dir, 'crux-neuclir/topic', 'neuclir24-test-request.jsonl')
     topics = {}
     with open(path, "r") as f:
         for i, line in enumerate(f):
@@ -35,27 +39,13 @@ def load_queries(path, fields=['title', 'problem_statement']):
             queries[data.pop('request_id')] = " ".join([data[field] for field in fields])
     return queries
 
-# def load_subtopics_human(path,
-#                          raw_topics=None,
-#                          create_new_subtopics=False):
-#     # [TODO] AND/OR in the pipeline
-#     files = [f for f in glob.glob(f"{path}/nuggets_*json")]
-#     subquestions = {}
-#     for file in files:
-#         match = re.search(r"nuggets_(\d+)\.json$", file)
-#         qid = str(match.group(1))
-#         data = json.load(open(file, "r"))
-#         subquestions[qid] = list(data.keys())
-#     return subquestions
-
-def load_subtopics(
-    subset='neuclir', split='test', 
-    root_dir='/exp/scale25/artifacts/crux'
-):
-    file = os.path.join(root_dir, f"crux-{subset}", "subtopics/subquestions.human.jsonl")
+def load_subtopics(subset=None, split='test'):
+    # NOTE: NeuCLIR use QA-level nugget with empty nugget number
+    # file = os.path.join(root_dir, f"crux-neuclir", "subtopics/subquestions.human.jsonl") # NeuCLIR use QA-level nugget
+    file = os.path.join(root_dir, f"crux-neuclir", "subtopics/nuggets.human.jsonl")
     subquestions = {}
     items = [json.loads(l) for l in open(file).readlines()]
-    subquestions.update({i['id']: i['subquestions'] for i in items})
+    subquestions.update({i['id']: i['nuggets'] for i in items})
     return subquestions
 
 def prepreocess(texts):
@@ -116,13 +106,6 @@ def load_nuggets(path, include_answer=False):
     return nuggets
 
 
-def get_judgements_path(args):
-    """judgements are computed by running augmentation/gen_ratings.py"""
-    judgements_dir = os.path.join(args.crux_dir, args.dataset_name, args.tag)
-    path = os.path.join(judgements_dir, f"crux_{args.model}.jsonl")
-    return path
-
-
 def sort_and_truncate(run, max_k_dict=None):
     truncated_run = {}
     for qid, docid_scores in run.items():
@@ -131,10 +114,29 @@ def sort_and_truncate(run, max_k_dict=None):
         truncated_run[qid] = sorted_docs
     return truncated_run
 
-
 def binarize(qrels):
     binarized_qrels = {}
     for qid, docid_scores in qrels.items():
         docid_scores = {docid: 1 for docid, score in docid_scores.items()}
         binarized_qrels[qid] = docid_scores
     return binarized_qrels
+
+# def load_subtopics_human(path,
+#                          raw_topics=None,
+#                          create_new_subtopics=False):
+#     # [TODO] AND/OR in the pipeline
+#     files = [f for f in glob.glob(f"{path}/nuggets_*json")]
+#     subquestions = {}
+#     for file in files:
+#         match = re.search(r"nuggets_(\d+)\.json$", file)
+#         qid = str(match.group(1))
+#         data = json.load(open(file, "r"))
+#         subquestions[qid] = list(data.keys())
+#     return subquestions
+
+# def get_judgements_path(args):
+#     """judgements are computed by running augmentation/gen_ratings.py"""
+#     judgements_dir = os.path.join(args.crux_dir, args.dataset_name, args.tag)
+#     path = os.path.join(judgements_dir, f"crux_{args.model}.jsonl")
+#     return path
+

@@ -23,7 +23,7 @@ def load_run_or_qrel(path, topk=1000, threshold=1):
                 if (int(rank) <= topk):
                     run_dict[qid].update({docid: float(score)})
             except:
-                qid, _, docid, rel = line.strip().split()
+                qid, iteration, docid, rel = line.strip().split()
                 if int(rel) >= threshold:
                     run_dict[qid].update({docid: float(rel)})
     return run_dict
