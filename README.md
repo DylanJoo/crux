@@ -1,8 +1,9 @@
 # Controlled Retrieval-augmented Context Evaluation for Long-form RAG
 
 ### Update
-- 2025-10-06: Release data for crux-mds-duc04.
-- TBD: data for crux-mds-multi_news. 
+- 2025-10-06: Release data for crux-mds-duc04
+- 2025-10-08: Release data for crux-mds-multi_news
+- 2025-10-08: Release data for crux-neuclir
 - TBD: evaluation function.
 
 ### Preparation
@@ -11,7 +12,6 @@
 cd /your_datasets/
 git lfs install
 git clone https://huggingface.co/datasets/DylanJHJ/crux
-export CRUX_ROOT=/your_datasets/crux
 ```
 
 - Install crux loading from source (v0.4.0)
@@ -25,16 +25,31 @@ git clone https://github.com/DylanJoo/crux
 cd crux
 uv pip install -e .
 ```
-
-### Data loading 
-We build the dataset dependent script to unify all
+Set CRUX_ROOT to your datasets path:
+```shell
+export CRUX_ROOT=/your_datasets/crux
+```
+OR
 ```python
 os.environ["CRUX_ROOT"] = "/your_datasets/crux/"
+```
+
+### Data loading 
+We built a data loading function for the datasets in crux. 
+Currently, we support crux-mds-duc04 and crux-mds-multi_news, and neuclir.
+
+See the data format below
+```python
 from crux.tools.mds import load_data
 data = load_data(subset="duc04")  # or "subet=multi_news"
+print(data.iloc[0])
 
-from crux.tools.neuclir import load_data
-data = load_data()
+>>> 
+topic        Prepare a report on the violence and intimidat...
+subtopics    [Who was the mainstay of Buffalo's only aborti...
+report       Dr. Barnett Slepian, the mainstay of Buffalo's...
+qrel         {'duc04-test-0:0#0': 1.0, 'duc04-test-0:0#2': ...
+Name: duc04-test-0, dtype: object
 ```
 
 ### Evaluation
