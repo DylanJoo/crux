@@ -8,7 +8,7 @@ from .generic.ir_utils import (
     load_run_or_qrel, 
     load_corpus, 
     load_ratings, 
-    load_diversity_qrels
+    load_diversity_qrel
 )
 from .generic.config_utils import (
     load_yaml_config, 

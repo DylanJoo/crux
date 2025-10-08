@@ -3,21 +3,15 @@ import json
 from glob import glob
 from datasets import load_dataset, load_from_disk
 import pandas as pd
-from .text_utils import (
-    parse_mds,
-    normalize_list,
-    flatten_and_normalize,
-    maybe_chunking
-)
 
 # root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
 root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
 
-def load_data(subset='multi_news', split='test'):
-    topic = load_topic(subset, split)
-    subtopics = load_subtopics(subset, split)
-    report = load_report(subset, split)
-    qrel = get_qrel(subset, split)
+def load_data(subset='multi_news'):
+    topic = load_topic(subset)
+    subtopics = load_subtopics(subset)
+    report = load_report(subset)
+    qrel = get_qrel(subset)
 
     data_list = []
     for id in topic:
@@ -33,9 +27,8 @@ def load_data(subset='multi_news', split='test'):
     df = df.set_index('id')
     return df
 
-# TODO: consider update the hf dataset with subotopics
-def load_topic(subset='multi_news', split='test'):
-    path = os.path.join(root_dir, f"crux-mds-{subset}", "topic/*jsonl")
+def load_topic(subset='multi_news'):
+    path = os.path.join(root_dir, f"crux-mds-{subset}", f"topic/requests.*.jsonl")
     topic = {}
     for file in glob(path):
         items = [json.loads(l) for l in open(file).readlines()]
@@ -43,16 +36,42 @@ def load_topic(subset='multi_news', split='test'):
     return topic
 
 # TODO: consider update the hf dataset with subotopics
-def load_subtopics(subset='multi_news', split='test'):
-    path = os.path.join(root_dir, f"crux-mds-{subset}", "subtopics/*jsonl")
+def load_subtopics(subset='multi_news'):
+    path = os.path.join(root_dir, f"crux-mds-{subset}", "subtopics/subquestions.*.jsonl")
     subquestions = {}
     for file in glob(path):
         items = [json.loads(l) for l in open(file).readlines()]
         subquestions.update({i['id']: i['subquestions'] for i in items})
     return subquestions
 
+def load_report(subset='multi_news'):
+    if subset == 'multi_news':
+        ds = load_multi_news()['test']
+    if subset == 'duc04':
+        ds = load_duc04()
+    # 
+    reports = {}
+    for example in ds:
+        reports[f"{example['id']}"] = example['summary']
+    return reports
+
+# NOTE: the split is not used.
+def get_qrel(subset='multi_news', tau=3):
+    from ..generic.ir_utils import load_run_or_qrel
+    path = os.path.join(root_dir, f"crux-mds-{subset}", f"qrels/div_qrels-tau{tau}.txt")
+    qrel = load_run_or_qrel(path, topk=1000, threshold=1)
+    return qrel
+
+def get_rating(subset='multi_news', split='test'):
+    from ..generic.ir_utils import load_ratings
+    dir = os.path.join(root_dir, f"crux-mds-{subset}/judge")
+    ratings = load_ratings(dir)
+    return ratings
+
+##### Load from the origianl data, and with the preprocessing
 def load_multi_news(load_from_source=False):
     if load_from_source:
+        from .text_utils import parse_mds, normalize_list, flatten_and_normalize, maybe_chunking
         from huggingface_hub import snapshot_download
         repo_path = snapshot_download(repo_id="DylanJHJ/crux-mds", repo_type='dataset')
         ds = load_from_disk(repo_path+'/sources/multi_news')
@@ -68,6 +87,7 @@ def load_multi_news(load_from_source=False):
 
 def load_duc04(load_from_source=False):
     if load_from_source:
+        from .text_utils import parse_mds, normalize_list, flatten_and_normalize, maybe_chunking
         from huggingface_hub import snapshot_download
         repo_path = snapshot_download(repo_id="DylanJHJ/crux-mds", repo_type='dataset')
         ds = load_from_disk(repo_path+'/sources/duc04')['train']
@@ -87,26 +107,3 @@ def load_duc04(load_from_source=False):
         ds = load_dataset("DylanJHJ/crux-mds-duc04-source")['train']
     return ds
 
-def load_report(subset='multi_news', split='test'):
-    if subset == 'multi_news':
-        ds = load_multi_news()[split]
-    if subset == 'duc04':
-        ds = load_duc04()
-    # 
-    reports = {}
-    for example in ds:
-        reports[f"{example['id']}"] = example['summary']
-    return reports
-
-# NOTE: the split is not used.
-def get_qrel(subset='multi_news', split='test', tau=3):
-    from ..generic.ir_utils import load_run_or_qrel
-    path = os.path.join(root_dir, f"crux-mds-{subset}", f"qrels/div_qrels-tau{tau}.txt")
-    qrel = load_run_or_qrel(path, topk=1000, threshold=1)
-    return qrel
-
-def get_rating(subset='multi_news', split='test'):
-    from ..generic.ir_utils import load_ratings
-    dir = os.path.join(root_dir, f"crux-mds-{subset}/judge")
-    ratings = load_ratings(dir)
-    return ratings

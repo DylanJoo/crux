@@ -14,11 +14,6 @@ import pandas as pd
 # root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
 root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
 
-# def load_diversity_qrels(path: str) -> list:
-#     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
-#     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
-#     return diversity_qrels
-
 def load_topic():
     path = os.path.join(root_dir, 'crux-neuclir/topic', 'neuclir24-test-request.jsonl')
     topics = {}
@@ -31,22 +26,20 @@ def load_topic():
             topics[str(item["request_id"])] = title + " " + problem_statement
     return topics
 
-def load_queries(path, fields=['title', 'problem_statement']):
-    queries = {}
-    with open(path, "r") as f:
-        for line in f:
-            data = json.loads(line.strip())
-            queries[data.pop('request_id')] = " ".join([data[field] for field in fields])
-    return queries
-
-def load_subtopics(subset=None, split='test'):
+    # file = os.path.join(root_dir, f"crux-neuclir", "subtopics/subquestions.human.jsonl") # this is the qyestuis
+def load_subtopics(subset='nuggets'):
     # NOTE: NeuCLIR use QA-level nugget with empty nugget number
-    # file = os.path.join(root_dir, f"crux-neuclir", "subtopics/subquestions.human.jsonl") # NeuCLIR use QA-level nugget
-    file = os.path.join(root_dir, f"crux-neuclir", "subtopics/nuggets.human.jsonl")
+    file = os.path.join(root_dir, f"crux-neuclir", f"subtopics/{subset}.human.jsonl")
     subquestions = {}
     items = [json.loads(l) for l in open(file).readlines()]
     subquestions.update({i['id']: i['nuggets'] for i in items})
     return subquestions
+
+def get_qrel(subset='multi_news', split='test', tau=3):
+    from ..generic.ir_utils import load_run_or_qrel
+    path = os.path.join(root_dir, f"crux-mds-{subset}", f"qrels/div_qrels-tau{tau}.txt")
+    qrel = load_run_or_qrel(path, topk=1000, threshold=1)
+    return qrel
 
 def prepreocess(texts):
     pattern = re.compile(r"^(\d+)*\.")
@@ -121,6 +114,7 @@ def binarize(qrels):
         binarized_qrels[qid] = docid_scores
     return binarized_qrels
 
+### NOTE: These are the deprecated function? (to be confirmed)
 # def load_subtopics_human(path,
 #                          raw_topics=None,
 #                          create_new_subtopics=False):
@@ -139,4 +133,17 @@ def binarize(qrels):
 #     judgements_dir = os.path.join(args.crux_dir, args.dataset_name, args.tag)
 #     path = os.path.join(judgements_dir, f"crux_{args.model}.jsonl")
 #     return path
+
+# def load_queries(path, fields=['title', 'problem_statement']):
+#     queries = {}
+#     with open(path, "r") as f:
+#         for line in f:
+#             data = json.loads(line.strip())
+#             queries[data.pop('request_id')] = " ".join([data[field] for field in fields])
+#     return queries
+
+# def load_diversity_qrels(path: str) -> list:
+#     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
+#     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
+#     return diversity_qrels
 

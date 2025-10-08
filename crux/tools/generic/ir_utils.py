@@ -87,16 +87,7 @@ def load_searcher(path, dense=False):
 #         else:
 #             yield iterable[ndx:min(ndx + size, l)]
 
-# def load_qrels(path, threshold=1):
-#     data = defaultdict(dict)
-#     with open(path) as f:
-#         for line in f:
-#             qid, _, docid, score = line.strip().split()
-#             if int(score) >= threshold:
-#                 data[qid].update({docid: int(score)})
-#     return data
-
-def load_diversity_qrels(path):
+def load_diversity_qrel(path):
     # return pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
     return ir_measures.read_trec_qrels(path)
 

@@ -4,7 +4,7 @@ import re
 
 from collections import defaultdict
 
-from augmentation.gen_ratings import gen_ratings
+# from augmentation.gen_ratings import gen_ratings
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,26 +28,26 @@ def load_judgements_from_disk(judgements, path, load_andor=False):
 
     return judgements
 
-def load_judgements(args, rac_data,
-                    compute_missing_judgements=False,
-                    load_andor=False) -> defaultdict:
-
-    judgements = defaultdict(lambda: defaultdict(lambda: None))
-    missing_judgements = defaultdict(lambda: defaultdict(lambda: None))
-    if args.crux_artifacts_path:
-        judgements = load_judgements_from_disk(judgements, args.crux_artifacts_path, load_andor=load_andor)
-
-    for qid in rac_data.keys():
-        for pid in rac_data[qid]["docids"]:
-            if judgements[qid][pid] is None:
-                #logger.warning(f"qid {qid}, pid {pid} is not found in judgements loaded from disk")
-                missing_judgements[qid][pid] = True
-    
-    if compute_missing_judgements and missing_judgements:
-        qrel_missing = {qid: list(pid_dict.keys()) for qid, pid_dict in missing_judgements.items()}
-        gen_ratings(args, qrel_missing=qrel_missing)
-
-    return judgements
+# def load_judgements(args, rac_data,
+#                     compute_missing_judgements=False,
+#                     load_andor=False) -> defaultdict:
+#
+#     judgements = defaultdict(lambda: defaultdict(lambda: None))
+#     missing_judgements = defaultdict(lambda: defaultdict(lambda: None))
+#     if args.crux_artifacts_path:
+#         judgements = load_judgements_from_disk(judgements, args.crux_artifacts_path, load_andor=load_andor)
+#
+#     for qid in rac_data.keys():
+#         for pid in rac_data[qid]["docids"]:
+#             if judgements[qid][pid] is None:
+#                 #logger.warning(f"qid {qid}, pid {pid} is not found in judgements loaded from disk")
+#                 missing_judgements[qid][pid] = True
+#     
+#     if compute_missing_judgements and missing_judgements:
+#         qrel_missing = {qid: list(pid_dict.keys()) for qid, pid_dict in missing_judgements.items()}
+#         gen_ratings(args, qrel_missing=qrel_missing)
+#
+#     return judgements
 
 def load_human_judgements(path: str):
     judgements = defaultdict(lambda: defaultdict(lambda: None))
