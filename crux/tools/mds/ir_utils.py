@@ -4,7 +4,6 @@ from glob import glob
 from datasets import load_dataset, load_from_disk
 import pandas as pd
 
-# root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
 root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
 
 def load_data(subset='multi_news'):

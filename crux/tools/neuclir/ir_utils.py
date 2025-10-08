@@ -1,18 +1,30 @@
-import asyncio
-import requests
-from argparse import Namespace
-import re
 import os
 import glob
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import json
-import pickle
 
-from tqdm import tqdm
 import pandas as pd
 
-# root_dir = os.environ.get('CRUX_ROOT', '/exp/scale25/artifacts/crux')
 root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
+
+def load_data():
+    topic = load_topic()
+    subtopics = load_subtopics("nuggets")
+    qrel = get_qrel()
+
+    data_list = []
+    for id in topic:
+        data_list.append({
+            'id': id,
+            'topic': topic[id],
+            'subtopics': subtopics.get(id, None),
+            'report': "NA",
+            'qrel': qrel.get(id, None)
+        })
+
+    df = pd.DataFrame(data_list).dropna(axis=0)
+    df = df.set_index('id')
+    return df
 
 def load_topic():
     path = os.path.join(root_dir, 'crux-neuclir/topic', 'neuclir24-test-request.jsonl')
@@ -26,78 +38,20 @@ def load_topic():
             topics[str(item["request_id"])] = title + " " + problem_statement
     return topics
 
-    # file = os.path.join(root_dir, f"crux-neuclir", "subtopics/subquestions.human.jsonl") # this is the qyestuis
-def load_subtopics(subset='nuggets'):
-    # NOTE: NeuCLIR use QA-level nugget with empty nugget number
+# NOTE: NeuCLIR use QA-level nugget with empty nugget number 
+def load_subtopics(subset='nuggets'): 
+    """ subset='nuggets' or 'subquestions' """
     file = os.path.join(root_dir, f"crux-neuclir", f"subtopics/{subset}.human.jsonl")
     subquestions = {}
     items = [json.loads(l) for l in open(file).readlines()]
     subquestions.update({i['id']: i['nuggets'] for i in items})
     return subquestions
 
-def get_qrel(subset='multi_news', split='test', tau=3):
+def get_qrel(tau=3):
     from ..generic.ir_utils import load_run_or_qrel
-    path = os.path.join(root_dir, f"crux-mds-{subset}", f"qrels/div_qrels-tau{tau}.txt")
+    path = os.path.join(root_dir, "crux-neuclir", "qrels/neuclir24-test-request.qrel")
     qrel = load_run_or_qrel(path, topk=1000, threshold=1)
     return qrel
-
-def prepreocess(texts):
-    pattern = re.compile(r"^(\d+)*\.")
-    texts = re.sub(r"\<q\>|\<\/q\>", "\n", texts)
-    texts = re.sub(pattern, "\n", texts)
-    pattern = re.compile(r"^(\d+)*\.")
-    texts = re.sub(pattern, "", texts)
-    return texts
-
-# def load_ratings(path):
-#     ratings = defaultdict(lambda: defaultdict(lambda: None))
-#     contexts = defaultdict(lambda: None)
-#     if os.path.exists(path):
-#         with open(path, 'r') as f:
-#             for line in f:
-#                 data = json.loads(line.strip())
-#                 id = data['id']
-#                 ratings[id].update({data['pid']: data['rating']})
-#     return ratings
-
-# def load_subtopics(args, topic):
-#     # TODO: replace with code from the auto-nuggetization team
-#     subtopics = generate_subtopics(args, topic)
-#     return subtopics
-
-# async def async_load_subtopics(args, topic):
-#     # [TODO] replace with code from the auto-nuggetization team
-#     subtopics = await async_generate_subtopics(args, topic)
-#     return subtopics
-
-def load_corpus_online(path=None):
-    class get_content:
-        def __len__(self):
-            return 1
-
-        def __getitem__(self, doc_id):
-            doc = requests.post(url="http://10.162.95.158:5000", json={"collection": "neuclir", "id": doc_id}).json()
-            text = doc.get("text", "").replace("\n", " ").strip()
-            title = doc.get("title", "").replace("\n", " ").strip()
-            return {"text": text, "title": title}
-
-    return get_content()
-
-
-def load_nuggets(path, include_answer=False):
-    if os.path.isdir(path):
-        files = [f for f in glob.glob(f"{path}/*")]
-    else:
-        files = [path]
-
-    nuggets = {}
-    for file in files:
-        match = re.search(r"nuggets_(\d+)\.json$", file)
-        if match:
-            qid = str(match.group(1))
-            nuggets[qid] = json.load(open(file, "r"))
-    return nuggets
-
 
 def sort_and_truncate(run, max_k_dict=None):
     truncated_run = {}
@@ -146,4 +100,60 @@ def binarize(qrels):
 #     qrels = pd.read_csv(path, sep="\s+", names=["query_id", "iteration", "doc_id", "relevance"])
 #     diversity_qrels = [Qrel(str(row.query_id), row.doc_id, row.relevance, row.iteration) for row in qrels.itertuples(index=False)]
 #     return diversity_qrels
+
+# def load_ratings(path):
+#     ratings = defaultdict(lambda: defaultdict(lambda: None))
+#     contexts = defaultdict(lambda: None)
+#     if os.path.exists(path):
+#         with open(path, 'r') as f:
+#             for line in f:
+#                 data = json.loads(line.strip())
+#                 id = data['id']
+#                 ratings[id].update({data['pid']: data['rating']})
+#     return ratings
+
+# def load_subtopics(args, topic):
+#     # TODO: replace with code from the auto-nuggetization team
+#     subtopics = generate_subtopics(args, topic)
+#     return subtopics
+
+# async def async_load_subtopics(args, topic):
+#     # [TODO] replace with code from the auto-nuggetization team
+#     subtopics = await async_generate_subtopics(args, topic)
+#     return subtopics
+
+# def prepreocess(texts):
+#     pattern = re.compile(r"^(\d+)*\.")
+#     texts = re.sub(r"\<q\>|\<\/q\>", "\n", texts)
+#     texts = re.sub(pattern, "\n", texts)
+#     pattern = re.compile(r"^(\d+)*\.")
+#     texts = re.sub(pattern, "", texts)
+#     return texts
+# 
+# def load_corpus_online(path=None):
+#     class get_content:
+#         def __len__(self):
+#             return 1
+# 
+#         def __getitem__(self, doc_id):
+#             doc = requests.post(url="http://10.162.95.158:5000", json={"collection": "neuclir", "id": doc_id}).json()
+#             text = doc.get("text", "").replace("\n", " ").strip()
+#             title = doc.get("title", "").replace("\n", " ").strip()
+#             return {"text": text, "title": title}
+# 
+#     return get_content()
+
+# def load_nuggets(path, include_answer=False):
+#     if os.path.isdir(path):
+#         files = [f for f in glob.glob(f"{path}/*")]
+#     else:
+#         files = [path]
+# 
+#     nuggets = {}
+#     for file in files:
+#         match = re.search(r"nuggets_(\d+)\.json$", file)
+#         if match:
+#             qid = str(match.group(1))
+#             nuggets[qid] = json.load(open(file, "r"))
+#     return nuggets
 

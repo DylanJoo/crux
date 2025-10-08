@@ -27,10 +27,14 @@ uv pip install -e .
 ```
 
 ### Data loading 
+We build the dataset dependent script to unify all
 ```python
 os.environ["CRUX_ROOT"] = "/your_datasets/crux/"
 from crux.tools.mds import load_data
-data = load_data(subset="duc04", split="test")  # or "subet=multi_news"
+data = load_data(subset="duc04")  # or "subet=multi_news"
+
+from crux.tools.neuclir import load_data
+data = load_data()
 ```
 
 ### Evaluation
