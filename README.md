@@ -14,18 +14,14 @@ git lfs install
 git clone https://huggingface.co/datasets/DylanJHJ/crux
 ```
 
-- Install crux loading from source (v0.4.0)
-We recommend to use the conda environment.
-```shell
-conda install -f environment.yaml
-```
-Then install crux from source:
+- Installation 
+Install crux from source:
 ```shell
 git clone https://github.com/DylanJoo/crux
 cd crux
 uv pip install -e .
 ```
-Set CRUX_ROOT to your datasets path:
+[IMPORTANT] Set CRUX_ROOT environment variable to the path where you downloaded the datasets.
 ```shell
 export CRUX_ROOT=/your_datasets/crux
 ```
@@ -35,10 +31,9 @@ os.environ["CRUX_ROOT"] = "/your_datasets/crux/"
 ```
 
 ### Data loading 
-We built a data loading function for the datasets in crux. 
-Currently, we support crux-mds-duc04 and crux-mds-multi_news, and neuclir.
+We have provided data loading functions in crux. Currently, we support crux-mds-duc04 and crux-mds-multi_news, and neuclir.
 
-See the data format below
+See the data format below. Full content example is listed at the end of this README.
 ```python
 from crux.tools.mds import load_data
 data = load_data(subset="duc04")  # or "subet=multi_news"
