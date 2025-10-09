@@ -10,9 +10,12 @@
 #SBATCH --output=%x-%j.out
 
 # Set-up the environment.
-source ~/.bashrc
-enter_conda
+module load anaconda3/2024.2
 conda activate crux
-cd ~/crux-scale/crux-researchy/
 
-python researchy-run.py --shard $SLURM_ARRAY_TASK_ID --num_shards 10
+cd ~/crux/crux-researchy/
+# init query
+python researchy-run.py --q_type init-q --shard $SLURM_ARRAY_TASK_ID --num_shards 2
+
+# GPT4 query
+python researchy-run.py --q_type gpt4-q --shard $SLURM_ARRAY_TASK_ID --num_shards 10

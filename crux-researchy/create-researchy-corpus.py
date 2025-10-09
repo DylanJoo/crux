@@ -3,7 +3,8 @@ import json
 import argparse
 from tqdm import tqdm
 from crux.tools import batch_iterator, load_run_or_qrel
-from crux.tools.researchy.ir_utils import create_subset_corpus, get_qrel
+from crux.tools.researchy.prep_utils import create_subset_corpus
+from crux.tools.researchy.ir_utils import get_qrel
 
 def main(args):
 

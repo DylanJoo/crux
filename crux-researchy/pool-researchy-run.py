@@ -9,10 +9,10 @@ def main(args):
 
     # Data 
     if args.query_type == "init-q":
-        queries = load_topic(hf_dataset_name="corbyrosset/researchy_questions")
+        queries = load_topic(split=args.split)
 
     if args.query_type == "gpt4-q":
-        queries = load_queries(hf_dataset_name="corbyrosset/researchy_questions")
+        queries = load_queries(split=args.split)
 
     if args.data.num_shards > 0:
         shard_size = len(queries) // args.data.num_shards
@@ -33,7 +33,7 @@ def main(args):
         topics=queries,
         batch_size=args.retrieval.batch_size,
         k=args.retrieval.k,
-        writer=open(args.data.output_run + f".shard{args.data.shard}" if args.data.num_shards > 1 else "", "w"),
+        writer=open(args.data.output_run + (f".shard{args.data.shard}" if args.data.num_shards > 1 else ""), "w"),
         stemming=True
     )
 
@@ -41,23 +41,25 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run researchy queries with BM25 retrieval.")
     parser.add_argument("--shard", type=int, default=0, help="Shard number for distributed processing.")
     parser.add_argument("--num_shards", type=int, default=1, help="Total number of shards for distributed processing.")
+    parser.add_argument("--split", type=str, default="train", help="train or test")
+    parser.add_argument("--q_type", type=str, default="init-q", help="Type of queries to use: init-q or gpt4-q")
     cli_args = parser.parse_args()
 
     from types import SimpleNamespace
-    for q_type in ["gpt4-q"]:
-        args = SimpleNamespace(
-            data=SimpleNamespace(
-                index_dir="/exp/ayates/clueweb22-index/en-all_porter_stemmer/",
-                output_run=f"/exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-{q_type}_bm25-clueweb22-b.txt",
-                shard=int(cli_args.shard),
-                num_shards=int(cli_args.num_shards)
-            ),
-            query_type=q_type,
-            retrieval=SimpleNamespace(
-                k1=0.9,
-                b=0.4,
-                batch_size=64,
-                k=100
-            )
+    args = SimpleNamespace(
+        data=SimpleNamespace(
+            index_dir="/exp/ayates/clueweb22-index/en-all_porter_stemmer/",
+            output_run=f"/exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-{cli_args.split}-{cli_args.q_type}_bm25-clueweb22-b.txt",
+            shard=int(cli_args.shard),
+            num_shards=int(cli_args.num_shards)
+        ),
+        query_type=cli_args.q_type,
+        split=cli_args.split,
+        retrieval=SimpleNamespace(
+            k1=0.9,
+            b=0.4,
+            batch_size=128,
+            k=100
         )
-        main(args)
+    )
+    main(args)

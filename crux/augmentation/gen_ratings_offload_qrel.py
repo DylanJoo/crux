@@ -41,15 +41,14 @@ def main(
     args,
     dataset='researchy',
     subset=None,
-    load_mode='vllm',
-    split='test'
+    split='train'
 ):
 
     # Load data-dependent functions 
     ir_utils = importlib.import_module(f"crux.tools.{dataset}.ir_utils", package=__name__)
-    all_topic = ir_utils.load_topic() if subset is None else ir_utils.load_topic(subset=subset)
-    all_subquestions = ir_utils.load_subtopics() if subset is None else ir_utils.load_subtopics(subset=subset)
-    run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=3, threshold_score=0.6)
+    all_topic = ir_utils.load_topic(split=split) if subset is None else ir_utils.load_topic(subset=subset, split=split)
+    all_subquestions = ir_utils.load_subtopics(split=split) if subset is None else ir_utils.load_subtopics(subset=subset, split=split)
+    run = load_run_or_qrel(args.run_path, topk=args.top_k, threshold=3)
     qrel = ir_utils.get_qrel()
     corpus = load_corpus(args.corpus)
     # all_reports = ir_utils.load_report(subset=dataset, split=split)
@@ -66,10 +65,8 @@ def main(
     # Ignore already done
     output_path = os.path.join(
         args.output_dir, 
-        f"ratings.{args.model.split('/')[-1]}.qrel.jsonl"
+        f"ratings.{split}.{args.model.split('/')[-1]}.qrel.jsonl"
     )
-
-    # filter 1: existing qrels
     if os.path.exists(output_path.replace("-offload-qrel", "")): # remove the offload for original dataset
         ratings_done = load_ratings(output_path.replace("-offload-qrel", ""))
     else:
@@ -91,7 +88,6 @@ def main(
         for docid, doc in zip(doc_id_list, doc_text_list):
 
             for j, question in enumerate(subquestions):
-
                 prompt = prompt_template.format(
                     question=question,
                     context=" ".join(doc['text'].split()[:2048])
@@ -117,7 +113,6 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
 
     # Model and decoding
-    parser.add_argument("--load_mode", type=str, default='no', help="['vllm', 'api']")
     parser.add_argument("--model", type=str, help="Model to use")
     parser.add_argument("--num_gpus", default=1, type=int)
     parser.add_argument("--temperature", type=float, default=0, help="Temperature for decoding")
@@ -140,6 +135,5 @@ if __name__ == "__main__":
     main(
         args=args,
         dataset=args.dataset,
-        load_mode=args.load_mode,
-        split='test'
+        split='test' if 'test' in args.run_path else 'train'
     )

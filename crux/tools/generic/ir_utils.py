@@ -52,7 +52,7 @@ def load_corpus(path):
 
     for file in files:
         with open(file, 'r') as f:
-            for line in f:
+            for line in tqdm(f):
                 data = json.loads(line.strip())
                 docid = data.get('id', data.get('_id', ''))
                 title = data.get('title', "").strip()

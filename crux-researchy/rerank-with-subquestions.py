@@ -53,12 +53,12 @@ def compute_logits(model, messages, sampling_params, true_token, false_token):
         scores.append(score)
     return scores
 
-def rerank(batch_size, shard, total_shards):
+def rerank(batch_size, shard, total_shards, split='train'):
 
     # prepare model and tokenizer
     number_of_gpu = torch.cuda.device_count()
     tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen3-Reranker-0.6B')
-    model = LLM(model='Qwen/Qwen3-Reranker-0.6B', tensor_parallel_size=number_of_gpu, max_model_len=10000, enable_prefix_caching=True, gpu_memory_utilization=0.9)
+    model = LLM(model='Qwen/Qwen3-Reranker-0.6B', tensor_parallel_size=number_of_gpu, max_model_len=10240, enable_prefix_caching=True, gpu_memory_utilization=0.9)
     tokenizer.padding_side = "left"
     tokenizer.pad_token = tokenizer.eos_token
     suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
@@ -75,11 +75,11 @@ def rerank(batch_size, shard, total_shards):
     # prepare corpus and runs
     from crux.tools import load_corpus, load_run_or_qrel, batch_iterator
     from crux.tools.researchy.ir_utils import load_subtopics, load_queries
-    run = load_run_or_qrel('/exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-init-q.bm25.clueweb22-b.txt', 
-                           topk=100)
-    corpus = load_corpus('/exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b-researchy-v1/corpus.pkl')
-    subquestions = load_subtopics()
-    queries = load_queries()
+    input = f'/exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-{split}-init-q.bm25.clueweb22-b.txt'
+    run = load_run_or_qrel(input, topk=100)
+    corpus = load_corpus('/exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v1/doc00.pkl')
+    subquestions = load_subtopics(split)
+    queries = load_queries(split)
     print(f"Data loading complete. Number of queries: {len(run)}")
 
     qids = list(run.keys())
@@ -88,7 +88,7 @@ def rerank(batch_size, shard, total_shards):
     qids = qids[shard * shard_size: (shard + 1) * shard_size]
 
     # ignore the qids that have been done
-    output_run = f'/exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-init-q.bm25+qwen3.clueweb22-b.txt{shard}'
+    output_run = input.replace('bm25', 'bm25+qwen3')+f"{shard}"
     if os.path.exists(output_run):
         run_done = load_run_or_qrel(output_run, topk=100)
         qids = [qid for qid in qids if qid not in run_done]
@@ -126,8 +126,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=100, help='Batch size for processing')
     parser.add_argument('--shard', type=int, default=0, help='Shard index for distributed processing')
-    parser.add_argument('--total_shards', type=int, default=20, help='Total number of shards for distributed processing')
+    parser.add_argument('--total_shards', type=int, default=20, help='total number of shards for distributed processing')
+    parser.add_argument('--split', type=str, default='train', help='data split, train or dev')
     args = parser.parse_args()
 
-    rerank(batch_size=args.batch_size, shard=args.shard, total_shards=args.total_shards)
+    rerank(batch_size=args.batch_size, shard=args.shard, total_shards=args.total_shards, split=args.split)
     destroy_model_parallel()
