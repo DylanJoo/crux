@@ -9,7 +9,7 @@
 ### Preparation
 - Download datasets
 ```shell
-cd /your_datasets/
+cd your_datasets/
 git lfs install
 git clone https://huggingface.co/datasets/DylanJHJ/crux
 ```
