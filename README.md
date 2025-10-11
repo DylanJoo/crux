@@ -19,7 +19,7 @@ Install crux from source:
 ```shell
 git clone https://github.com/DylanJoo/crux
 cd crux
-uv pip install -e .
+pip install -e .
 ```
 [IMPORTANT] Set CRUX_ROOT environment variable to the path where you downloaded the datasets.
 ```shell
