@@ -35,7 +35,7 @@ We have provided data loading functions in crux. Currently, we support crux-mds-
 
 See the data format below. Full content example is listed at the end of this README.
 ```python
-from crux.tools.mds import load_data
+from crux.tools.mds.ir_utils import load_data
 data = load_data(subset="duc04")  # or "subet=multi_news"
 print(data.iloc[0])
 
@@ -49,7 +49,7 @@ Name: duc04-test-0, dtype: object
 
 For NeuCLIR, we leave the `report` field empty, as it is not provided in the original dataset.
 ```python
-from crux.tools.neuclir import load_data
+from crux.tools.neuclir.ir_utils import load_data
 data = load_data()
 print(data.iloc[0])
 
