@@ -14,7 +14,7 @@ def load_run_or_qrel(path, topk=1000, threshold=1):
     if os.path.exists(path) is False:
         return run_dict
 
-    logger.info(f"Loading topk={topk}, threshold={threshold}...")
+    logger.info(f"Loading run/qrel with topk={topk}, threshold={threshold}...")
     with open(path, "r") as f:
         for i, line in enumerate(f):
             try: 
