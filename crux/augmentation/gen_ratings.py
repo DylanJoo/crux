@@ -18,7 +18,6 @@ from ..tools import (
     load_run_or_qrel,
     load_ratings
 )
-import pdb
 
 # Define the prompt for rating generation
 prompt_template = """\
