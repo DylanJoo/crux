@@ -6,6 +6,7 @@ We evaluate a few first-stage retrieval methods:
 - SPLADE v3 (`naver/splade-v3`)
 - Qwen3-embedding-8b (`Qwen/Qwen3-Embedding-8B`)
 
+> The evaluation script, please refer to [https://github.com/DylanJoo/crux/tree/module?tab=readme-ov-file#evaluation](https://github.com/DylanJoo/crux/tree/module?tab=readme-ov-file#evaluation)
 
 ## CRUX-MDS-DUC04
 | method                                    | Metric  | Score  | Metric  | Score  | Metric       | Score  | Metric | Score  |
