@@ -16,14 +16,13 @@ We adpot the following first-stage retrieval methods for evaluation:
 | qwen3-embedding-8b.crux-mds-duc04.txt     | P@10 | 0.7380 | nDCG@10 | 0.7583 | alpha_nDCG@10 | 0.6077 | Cov@10 | 0.6637 | 
 
 ## CRUX-MDS-Multi_news (small)
-| method                                    | Metric  | Score  | Metric  | Score  | Metric       | Score  | Metric | Score  |
-|-------------------------------------------|---------|--------|---------|--------|--------------|--------|--------|--------|
+| method                                       | Metric | Score  | Metric  | Score  | Metric       | Score  | Metric | Score  |
+|----------------------------------------------|--------|--------|---------|--------|--------------|--------|--------|--------|
+ bm25.default.crux-mds-multi_news.txt          | P@10 | 0.2610 | nDCG@10 | 0.4122 | alpha_nDCG@10 | 0.4415 | Cov@10 | 0.4622 | 
+ contriever-ft.default.crux-mds-multi_news.txt | P@10 | 0.3380 | nDCG@10 | 0.4801 | alpha_nDCG@10 | 0.4934 | Cov@10 | 0.5364 | 
+ splade-v3.default.crux-mds-multi_news.txt     | P@10 | 0.3420 | nDCG@10 | 0.5071 | alpha_nDCG@10 | 0.5166 | Cov@10 | 0.5355 | 
+ qwen3-embedding-8b.crux-mds-multi_news.txt    | P@10 | 0.3740 | nDCG@10 | 0.5530 | alpha_nDCG@10 | 0.5966 | Cov@10 | 0.6087 | 
 
 ## NeuCLIR (with CRUX evaluation)
 | method                                    | Metric  | Score  | Metric  | Score  | Metric       | Score  | Metric | Score  |
 |-------------------------------------------|---------|--------|---------|--------|--------------|--------|--------|--------|
-
-runs | bm25.default.crux-mds-multi_news.txt | P@10 | 0.2610 | nDCG@10 | 0.4122 | alpha_nDCG@10 | 0.4415 | Cov@10 | 0.4622 | 
-runs | contriever-ft.default.crux-mds-multi_news.txt | P@10 | 0.3380 | nDCG@10 | 0.4801 | alpha_nDCG@10 | 0.4934 | Cov@10 | 0.5364 | 
-runs | qwen3-embedding-8b.crux-mds-multi_news.txt | P@10 | 0.3740 | nDCG@10 | 0.5530 | alpha_nDCG@10 | 0.5966 | Cov@10 | 0.6087 | 
-runs | splade-v3.default.crux-mds-multi_news.txt | P@10 | 0.3420 | nDCG@10 | 0.5071 | alpha_nDCG@10 | 0.5166 | Cov@10 | 0.5355 | 
