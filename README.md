@@ -8,7 +8,7 @@
 - TBD: evaluation function.
 
 ### Preparation
-- Download datasets and the corpus
+- Download [crux-data](https://huggingface.co/datasets/DylanJHJ/crux) and the [crux-mds-corpus](https://huggingface.co/datasets/DylanJHJ/crux-mds-corpus).
 ```shell
 cd your_datasets/
 git lfs install
