@@ -25,6 +25,7 @@ def load_run_or_qrel(path, topk=1000, threshold=1):
                 qid, iteration, docid, rel = line.strip().split()
                 if int(rel) >= threshold:
                     run_dict[qid].update({docid: float(rel)})
+    logger.info(f"{len(run_dict)} loaded")
     return run_dict
 
 def load_diversity_qrel(path):
