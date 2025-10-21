@@ -75,9 +75,12 @@ if __name__ == "__main__":
     ratings = load_ratings(args.judge)
 
     ## sanity check
-    missing_qids = [qid for qid in run.keys() if qid not in qrel]
+    missing_qids = [qid for qid in qrel.keys() if qid not in run]
     if len(missing_qids) > 0:
-        logger.warning(f"Missing results: {len(missing_qids)} / {len(run)} -> {missing_qids}.")
+        qrel = {k: v for k, v in qrel.items() if k in run}
+        div_qrel = div_qrel[div_qrel['query_id'].isin(run.keys())]
+        logger.warning(f"Missing results: {len(missing_qids)} / {len(qrel)}")
+        logger.warning(f"Evaluate on the overlapped topics: {len(qrel)}")
 
     # run eval
     outputs = rac_eval(
