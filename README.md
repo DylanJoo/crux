@@ -4,6 +4,7 @@
 - 2025-10-06: Release data for crux-mds-duc04
 - 2025-10-08: Release data for crux-mds-multi_news
 - 2025-10-08: Release data for crux-neuclir
+- 2025-10-21: Release reproducible evaluation result on DUC04. See [runs](runs/)
 - TBD: evaluation function.
 
 ### Preparation
