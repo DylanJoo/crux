@@ -1,6 +1,6 @@
 # Evaluation Results
 
-We adpot the following first-stage retrieval methods for evaluation:
+We evaluate a few first-stage retrieval methods:
 - BM25
 - Contriever (`facebook/contriever-msmarco`)
 - SPLADE v3 (`naver/splade-v3`)
