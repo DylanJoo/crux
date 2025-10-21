@@ -67,16 +67,12 @@ Name: 300, dtype: object
 We support the run file in `TREC` format. The evaluation implementation is 
 
 ```shell
-cd crux
-
-CRUX_ROOT=/your_datasets/crux
-subset=crux-mds-duc04
-
+subset=crux-mds-duc04 # or subset=crux-mds-multi_news
 python -m crux.evaluation.rac_eval \
     --run $run_file \
-    --qrel ${CRUX_ROOT}/${subset}/qrels/div_qrels-tau3.txt \
+    --qrel /your_datasets/crux/${subset}/qrels/div_qrels-tau3.txt \
     --filter_by_oracle \
-    --judge ${CRUX_ROOT}/${subset}/judge/ratings.Llama-3.1-70B-Instruct.0-1.jsonl
+    --judge /your_datasets/crux/${subset}/judge/ratings.Llama-3.1-70B-Instruct.0-1.jsonl
 >>>
 2025-10-21 10:50:43,196 - INFO - Loading run/qrel with topk=10, threshold=1...
 2025-10-21 10:50:43,219 - INFO - Loading run/qrel with topk=1000, threshold=1...
