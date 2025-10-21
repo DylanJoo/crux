@@ -4,14 +4,16 @@
 - 2025-10-06: Release data for crux-mds-duc04
 - 2025-10-08: Release data for crux-mds-multi_news
 - 2025-10-08: Release data for crux-neuclir
+- 2025-10-21: Release evaluation script and result on DUC04. See [runs](runs/)
 - TBD: evaluation function.
 
 ### Preparation
-- Download datasets
+- Download [crux-data](https://huggingface.co/datasets/DylanJHJ/crux) and the [crux-mds-corpus](https://huggingface.co/datasets/DylanJHJ/crux-mds-corpus).
 ```shell
 cd your_datasets/
 git lfs install
 git clone https://huggingface.co/datasets/DylanJHJ/crux
+git clone https://huggingface.co/datasets/DylanJHJ/crux-mds-corpus
 ```
 
 - Installation 
@@ -62,8 +64,23 @@ Name: 300, dtype: object
 ```
 
 ### Evaluation
-```python
-TBD
+We support the run file in `TREC` format. The evaluation implementation is 
+
+```shell
+cd crux
+
+CRUX_ROOT=/your_datasets/crux
+subset=crux-mds-duc04
+
+python -m crux.evaluation.rac_eval \
+    --run $run_file \
+    --qrel ${CRUX_ROOT}/${subset}/qrels/div_qrels-tau3.txt \
+    --filter_by_oracle \
+    --judge ${CRUX_ROOT}/${subset}/judge/ratings.Llama-3.1-70B-Instruct.0-1.jsonl
+>>>
+2025-10-21 10:50:43,196 - INFO - Loading run/qrel with topk=10, threshold=1...
+2025-10-21 10:50:43,219 - INFO - Loading run/qrel with topk=1000, threshold=1...
+runs | bm25.default.crux-mds-duc04.txt | P@10 | 0.5140 | nDCG@10 | 0.5298 | alpha_nDCG@10 | 0.4454 | Cov@10 | 0.5444 | 
 ```
 
 ### Example of the first example in DUC04 test set

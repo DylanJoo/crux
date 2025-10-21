@@ -16,4 +16,3 @@ def normalize_texts(texts):
     pattern = re.compile(r"\s+")
     texts = re.sub(pattern, ' ', texts).strip()
     return texts
-

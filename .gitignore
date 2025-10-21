@@ -10,3 +10,4 @@ logs/
 *.swo
 *egg-info/*
 **/core
+*.out

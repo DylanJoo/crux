@@ -40,7 +40,8 @@ def main(args):
     # /exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.*qwen*
     input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
     # offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.qwen0.6b-top10"
-    offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.top20"
+    # offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.top20"
+    offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
     output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
 
     # Data 
