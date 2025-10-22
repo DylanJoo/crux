@@ -7,8 +7,8 @@ from tqdm import tqdm
 from crux.tools import batch_iterator, load_ratings
 from crux.tools.researchy.ir_utils import load_topic, load_subtopics
 
-def load_offload_jsonl(ratings, offload_dir):
-    subtopics = load_subtopics()
+def load_offload_jsonl(ratings, offload_dir, split='train'):
+    subtopics = load_subtopics(split)
 
     files = glob.glob(os.path.join(offload_dir, "*.jsonl"))
 
@@ -37,15 +37,21 @@ def load_offload_jsonl(ratings, offload_dir):
 
 def main(args):
     # Get input and outputs
-    # /exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.*qwen*
-    input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-    # offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.qwen0.6b-top10"
-    # offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.top20"
-    offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
-    output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+    if args.num_shards == 0:
+        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.test.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
+        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}"
+        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
+    else:
+        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
+        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+
+    split = 'train'
+    if 'test' in offload_dir:
+        split = 'test'
 
     # Data 
-    queries = load_topic()
+    queries = load_topic(split)
 
     if args.num_shards > 0:
         shard_size = len(queries) // args.num_shards
@@ -65,7 +71,7 @@ def main(args):
         ratings = {}
 
     if os.path.exists(offload_dir):
-        ratings = load_offload_jsonl(ratings, offload_dir)
+        ratings = load_offload_jsonl(ratings, offload_dir, split)
 
     print(f"{args.shard} - {args.num_shards} - Total ratings for {len(ratings)} queries")
 
@@ -86,10 +92,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run researchy queries with BM25 retrieval.")
-    parser.add_argument("--shard", type=int, default=0, help="Shard number for distributed processing.")
-    parser.add_argument("--num_shards", type=int, default=1, help="Total number of shards for distributed processing.")
+    parser.add_argument("--shard", type=str, default=0, help="Shard number for distributed processing.")
+    parser.add_argument("--num_shards", type=int, default=0, help="Total number of shards for distributed processing.")
     cli_args = parser.parse_args()
 
+    if cli_args.shard.isdigit():
+        cli_args.shard = int(cli_args.shard)
+
     from types import SimpleNamespace
-    args = SimpleNamespace(shard=int(cli_args.shard), num_shards=int(cli_args.num_shards))
+    args = SimpleNamespace(shard=cli_args.shard, num_shards=int(cli_args.num_shards))
     main(args)

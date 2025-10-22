@@ -19,12 +19,12 @@ cd ~/crux/crux-researchy/
 #     --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-init-q_bm25.clueweb22-b.txt \
 #     --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v1/doc00.jsonl
 
+python3 create-researchy-corpus.py --shard $SLURM_ARRAY_TASK_ID --num_shards 20 \
+    --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/run.all.init-q.txt \
+    --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v1/doc00.jsonl
+
 # CW-22-research v2 (trainin gpt4 query)
 # python3 create-researchy-corpus.py --shard $SLURM_ARRAY_TASK_ID --num_shards 10 \
 #     --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/run.researchy-gpt4-q_bm25.clueweb22-b.txt \
 #     --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v2/doc00.jsonl
 
-# Updated CW-22-research v1 (trainin init query + testing init query)
-python3 create-researchy-corpus.py --shard $SLURM_ARRAY_TASK_ID --num_shards 20 \
-    --input_run /exp/scale25/artifacts/crux/crux-researchy/runs/run.all.init-q.txt \
-    --output_corpus /exp/scale25/artifacts/crux/crux-researchy/docs/cw22-b.researchy-v1/doc00.jsonl

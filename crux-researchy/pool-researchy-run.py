@@ -25,7 +25,7 @@ def main(args):
         return
 
     # Retrieval
-    from crux.sim_rag.retrieve.bm25 import search
+    from crux.retrieve.bm25 import search
     output_run = search(
         index=args.data.index_dir,
         k1=args.retrieval.k1, 
