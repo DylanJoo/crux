@@ -1,8 +1,8 @@
 # Controlled Retrieval-augmented Context Evaluation for Long-form RAG
 
 ### Update
-- 2025-10-06: Release data for crux-mds-duc04
-- 2025-10-08: Release data for crux-mds-multi_news
+- 2025-09-06: Release data for crux-mds-duc04
+- 2025-09-08: Release data for crux-mds-multi_news
 - 2025-10-08: Release data for crux-neuclir
 - 2025-10-21: Release evaluation script and result on DUC04. See [runs](runs/)
 - TBD: evaluation function.
