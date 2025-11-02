@@ -11,5 +11,7 @@ logs/
 *egg-info/*
 **/core
 *.out
+**/*.out.*
+**/*.err.*
 
 legacy/

@@ -1,21 +1,18 @@
-#!/bin/sh
+#!/bin/bash -l
 #SBATCH --job-name=encode-d
-#SBATCH --partition=gpu_a100
-#SBATCH --gpus-per-node=1
-#SBATCH --mem=256G
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --array=2-9%2
-#SBATCH --time=24:00:00
 #SBATCH --output=enc-doc.out.%a
 #SBATCH --error=enc-doc.err.%a
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:nvidia_rtx_a6000:1
+#SBATCH --ntasks-per-node=1        
+#SBATCH --nodes=1                
+#SBATCH --array=42-63%4
+#SBATCH --mem=64G
+#SBATCH --time=1-00:00:00
 
-module load 2024
-module load Miniconda3/24.7.1-0
-module load CUDA/12.6.0/
-
-source /home/jju/temp/miniconda3/etc/profile.d/conda.sh
-conda activate ir
+# ENV
+source /ivi/ilps/personal/dju/miniconda3/etc/profile.d/conda.sh
+conda activate pyserini
 
 SHARD_ID=$SLURM_ARRAY_TASK_ID
 model=Qwen/Qwen3-Embedding-8B
