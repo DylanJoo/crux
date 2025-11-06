@@ -72,18 +72,21 @@ def main(
     else:
         ratings_done = {id: {} for id in qids}
 
+    f = open(output_path + '-agg', 'w')
     # Start generation
     for id in tqdm(qids, total=len(qids), desc=f"Dataset: {dataset} (shard: {args.shard}/{args.total_shards})"):
 
         subquestions = all_subquestions[id]
         doc_id_list = [docid for docid in qrel[id] if (docid not in ratings_done[id] and docid not in run[id])]
         doc_text_list = []
+        ## [BUG HERE!!!!!] the doc_id_list and doc_text_list are not aligned
         for docid in doc_id_list:
             try:
                 doc_text_list.append(corpus[docid])
             except:
                 print(f"Document {docid} not found in corpus for id {id}. Skipping.")
 
+        f.write(qid + "\t" + "|".join(doc_id_list) + '\n')
         output_array = []
         for docid, doc in zip(doc_id_list, doc_text_list):
 
@@ -98,18 +101,18 @@ def main(
                     writer.write(json.dumps({"id": f"{id}::{docid}::{j}", "messages": message}) + "\n")
 
     logger.info(f"Ratings saved to {output_path}")
+    f.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default=None, help="Path to the config file")
-
     parser.add_argument("--dataset", type=str, default="researchy", help="Dataset to use")
     parser.add_argument("--corpus", type=str, default=None, help="Path to the jsonl corpus file")
     parser.add_argument("--output_dir", type=str, default="./", help="Tag for the model")
     parser.add_argument("--run_path", type=str, default=None, help="Path to the run file (e.g., run.jsonl or qrel.jsonl)")
     parser.add_argument("--shard", type=int, default=0, help="the n-th shard")
     parser.add_argument("--total_shards", type=int, default=None, help="Total number of shards to split the dataset into")
-    parser.add_argument("--top_k", type=int, default=10, help="Top-k documents to consider for each query")
+    parser.add_argument("--top_k", type=int, default=20, help="Top-k documents to consider for each query")
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
 
     # Model and decoding
