@@ -61,13 +61,13 @@ def load_corpus(path):
                 corpus[str(docid)] = {'title': title, 'text': text}
     return corpus
 
-def load_ratings(path):
+def load_ratings(path, prefix=""):
     ratings = defaultdict(lambda: defaultdict(lambda: None))
 
     if not os.path.isdir(path):
         files = [path]
     else:
-        files = glob(path+"/*jsonl")
+        files = glob(path+f"/*{prefix}*jsonl")
 
     for path in files:
         with open(path, 'r') as f:
