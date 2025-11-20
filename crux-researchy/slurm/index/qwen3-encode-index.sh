@@ -6,8 +6,8 @@
 #SBATCH --gres=gpu:nvidia_rtx_a6000:1
 #SBATCH --ntasks-per-node=1        
 #SBATCH --nodes=1                
-#SBATCH --array=42-63%4
-#SBATCH --mem=64G
+#SBATCH --array=0,64
+#SBATCH --mem=48G
 #SBATCH --time=1-00:00:00
 
 # ENV
