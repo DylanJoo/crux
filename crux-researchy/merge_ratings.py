@@ -42,9 +42,10 @@ def main(args):
         offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}"
         output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
     else:
-        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
-        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+        # offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
+        offload_dir=f"/exp/ayates/scale25/batch-vllm/output/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
+        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
 
     split = 'train'
     if 'test' in offload_dir:
