@@ -29,8 +29,7 @@ def load_run_or_qrel(path, topk=1000, threshold=1):
 
 def load_diversity_qrel(path):
     import pandas as pd
-    df = pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
-    # print(df)
+    df = pd.read_csv(path, sep='\s', names=['query_id', 'iteration', 'doc_id', 'relevance'])
     return df
     # import ir_measures
     # return ir_measures.read_trec_qrels(path)
