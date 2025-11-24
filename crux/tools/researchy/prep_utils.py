@@ -11,7 +11,8 @@ def create_subset_corpus(
     subset=set(), 
     shard=0, num_shards=1
 ):
-    files = glob(glob_path)
+    files = sorted(glob(glob_path))
+    print('Total files:', len(files))
     shard_size = len(files) // num_shards
     files = files[shard * shard_size: (shard + 1) * shard_size]
 

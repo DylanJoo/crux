@@ -41,7 +41,8 @@ def create_subset_corpus(
     subset=set(), 
     shard=0, num_shards=1
 ):
-    files = glob(glob_path)
+    files = sorted(glob(glob_path))
+    print('Total files:', len(files))
     shard_size = len(files) // num_shards
     files = files[shard * shard_size: (shard + 1) * shard_size]
 
@@ -81,10 +82,11 @@ def create_subset_corpus(
     print(f"Total documents found: {len(corpus)}. Size of the subset documents: {len(subset)}")
     return corpus
 
-def get_qrel():
+def get_qrel(subset=None):
     qrel = {}
-    for subset in ['train', 'test']:
-        ds = load_dataset("corbyrosset/researchy_questions")[subset]
+    subsets = ['train', 'test'] if subset is None else [subset]
+    for subset_ in subsets:
+        ds = load_dataset("corbyrosset/researchy_questions")[subset_]
         for example in ds:
             rel_docs = [item['CluewebURLHash'] for item in example['DocStream']]
             qrel[example['id']] = {doc: 1 for doc in rel_docs}

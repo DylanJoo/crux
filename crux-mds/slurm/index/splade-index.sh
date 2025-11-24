@@ -18,5 +18,5 @@ python -m pyserini.index.lucene \
     --input ${HOME}/datasets/crux-mds-corpus/indices/splade-v3.crux-mds-corpus.lucene \
     --index ${HOME}/datasets/crux-mds-corpus/indices/splade-v3.crux-mds-corpus.lucene \
     --generator DefaultLuceneDocumentGenerator \
-    --threads 36 \
+    --threads 32 \
     --impact --pretokenized

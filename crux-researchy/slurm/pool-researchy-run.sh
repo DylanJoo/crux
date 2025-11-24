@@ -11,9 +11,10 @@
 
 # Set-up the environment.
 module load anaconda3/2024.2
-conda activate crux
+conda activate ir
 
 cd ~/crux/crux-researchy/
+#
 # init query
 python researchy-run.py --q_type init-q --shard $SLURM_ARRAY_TASK_ID --num_shards 2
 
