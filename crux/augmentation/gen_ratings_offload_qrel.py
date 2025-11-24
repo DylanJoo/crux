@@ -80,15 +80,20 @@ def main(
         doc_id_list = [docid for docid in qrel[id] if (docid not in ratings_done[id] and docid not in run[id])]
         doc_text_list = []
         ## [BUG HERE!!!!!] the doc_id_list and doc_text_list are not aligned
+        ## [Extract the ratings that are fine-to-use]
         for docid in doc_id_list:
             try:
                 doc_text_list.append(corpus[docid])
             except:
+                doc_text_list.append(None) # at this to fix the bug
                 print(f"Document {docid} not found in corpus for id {id}. Skipping.")
 
-        f.write(qid + "\t" + "|".join(doc_id_list) + '\n')
+        assert len(doc_id_list) == len(doc_text_list), 'the length of lists are inconsistent'
         output_array = []
         for docid, doc in zip(doc_id_list, doc_text_list):
+
+            if doc is None: # add this fix the bug
+                continue 
 
             for j, question in enumerate(subquestions):
                 prompt = prompt_template.format(
