@@ -32,7 +32,6 @@ def load_diversity_qrel(path):
     df = pd.read_csv(path, sep='\s+', names=['query_id', 'iteration', 'doc_id', 'relevance'])
     df['query_id'] = df['query_id'].astype(str)
     df['doc_id'] = df['doc_id'].astype(str)
-    # print(df)
     return df
     # import ir_measures
     # return ir_measures.read_trec_qrels(path)

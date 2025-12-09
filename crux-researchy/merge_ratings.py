@@ -36,19 +36,19 @@ def load_offload_jsonl(ratings, offload_dir, split='train'):
     return ratings
 
 def main(args):
-    # Get input and outputs
-    if args.num_shards == 0:
-        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.test.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
-        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}"
-        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
-    else:
-        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
-        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.test.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
-
     split = 'train'
     if 'test' in offload_dir:
         split = 'test'
+
+    # Get input and outputs
+    if args.num_shards == 0:
+        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
+        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}"
+        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}.jsonl"
+    else:
+        input_ratings=f"/exp/scale25/artifacts/crux/crux-researchy/judge/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
+        offload_dir=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload-done/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}"
+        output_path=f"/exp/scale25/artifacts/crux/crux-researchy/judge-offload/ratings.{split}.Llama-3.3-70B-Instruct.{args.shard}-{args.num_shards}.jsonl"
 
     # Data 
     queries = load_topic(split)
