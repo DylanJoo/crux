@@ -19,11 +19,12 @@ from ir_measures import Metric, MAP, nDCG, P, alpha_nDCG
 import pdb
 
 def coverage_meausres(ratings, ratings_oracle, filter_by_oracle=False, tau=3):
-    # get answerable amount
+    # get answerable amount # TODO: make it more compatible to different numpy version
     if filter_by_oracle:
-        answerable = np.bool([r>=tau for r in ratings_oracle])
+        # answerable = np.bool([r>=tau for r in ratings_oracle])
+        answerable = np.array([r>=tau for r in ratings_oracle])
     else:
-        answerable = np.bool([1 for r in ratings])
+        answerable = np.array([True for r in ratings])
     value = sum(ratings[answerable] >= tau) / sum(answerable)
     metric = Metric(query_id='dummy', value=value, measure='Cov')
     return metric
