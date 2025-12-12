@@ -4,10 +4,10 @@ import json
 from glob import glob
 from collections import defaultdict
 
-## 1. nugget to subtopic
-root_dir = '/users/judylan1/datasets/crux'
+root_dir = '/home/dju/datasets/crux'
 nugget_dir = f'{root_dir}/crux-neuclir/nuggets'
 
+## 1. nugget to subtopic
 subquestions = defaultdict(list)
 subquestions_with_answer = defaultdict(list)
 for file in glob(os.path.join(nugget_dir, f'nuggets_???.json')):
@@ -79,4 +79,4 @@ with open(f"{root_dir}/crux-neuclir/judge/ratings.human.jsonl", 'w') as f:
         for label in labels:
             rating[label-1] = 3
 
-        f.write(json.dumps({'id': qid, 'docid': docid, 'rating': rating})+'\n')
+        f.write(json.dumps({'id': str(qid), 'docid': docid, 'rating': rating})+'\n')
