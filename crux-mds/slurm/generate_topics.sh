@@ -24,8 +24,10 @@ python3 -m crux.augmentation.gen_topics \
     --config $HOME/crux/configs/default_config.yaml \
     --model meta-llama/Llama-3.3-70B-Instruct \
     --num_gpus 8 \
+    --temperature 0.7 \
+    --top_p 0.95 \
     --dataset mds --subset $subset \
-    --output_dir $root_dir/crux-mds-${subset}/topics \
+    --output_dir $root_dir/crux-mds-${subset}/topic \
     --max_new_tokens 128 \
     --max_model_len 8196 \
     --batch_size 32 \
