@@ -9,6 +9,7 @@ import math
 
 logger = logging.getLogger(__name__)
 
+# NOTE: we need a warning here for the cast that has missing path (so empty dict will be returned)
 def load_run_or_qrel(path, topk=1000, threshold=1):
     run_dict = defaultdict(dict)
     if os.path.exists(path) is False:
