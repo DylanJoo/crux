@@ -1,3 +1,4 @@
+import gzip
 import logging
 import re
 import os
@@ -52,7 +53,9 @@ def load_corpus(path):
         files = glob(path+"/*jsonl")
 
     for file in files:
-        with open(file, 'r') as f:
+        fopen = gzip.open(file, "rt", encoding="utf-8") if 'gz' in file else open(file, 'r')
+
+        with fopen as f:
             for line in tqdm(f):
                 data = json.loads(line.strip())
                 docid = data.get('id', data.get('_id', ''))
