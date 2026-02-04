@@ -8,6 +8,16 @@ from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 from ...tools import batch_iterator, normalize_text
 
+root_dir = os.environ.get('CRUX_ROOT', '/scratch/project_465001640/personal/dylan/datasets/crux')
+
+def load_request(split='train'):
+    path = os.path.join(root_dir, f"crux-researchy", f"topic/requests.{split}.*.jsonl")
+    request = {}
+    for file in glob(path):
+        items = [json.loads(l) for l in open(file).readlines()]
+        request.update({i['id']: i['request'] for i in items})
+    return request
+
 def load_topic(split='train'):
     ds = load_dataset("corbyrosset/researchy_questions")[split]
     queries = {}

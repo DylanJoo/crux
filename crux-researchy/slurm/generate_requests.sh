@@ -7,7 +7,7 @@
 #SBATCH --nodes=1                   # Total number of nodes 
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-node=4           # Allocate one gpu per MPI rank
-#SBATCH --array=0-1%0
+#SBATCH --array=0-100%8
 #SBATCH --mem=120G
 #SBATCH --time=24:00:00
 
@@ -16,10 +16,13 @@ conda activate pyserini
 
 crux_root=/home/dju/temp/datasets/crux
 export CRUX_ROOT=/home/dju/temp/datasets/crux
+model=meta-llama/Llama-3.3-70B-Instruct
+model=meta-llama/Llama-3.1-70B-Instruct
+model=Qwen/Qwen3-Next-80B-A3B-Instruct
 
 # python3 -m crux.augmentation.gen_requests \
 #     --config $HOME/crux/configs/default_config.yaml \
-#     --model meta-llama/Llama-3.3-70B-Instruct \
+#     --model $model \
 #     --num_gpus 4 \
 #     --temperature 0.7 \
 #     --top_p 0.95 \
@@ -31,7 +34,7 @@ export CRUX_ROOT=/home/dju/temp/datasets/crux
 
 python3 -m crux.augmentation.gen_requests \
     --config $HOME/crux/configs/default_config.yaml \
-    --model meta-llama/Llama-3.3-70B-Instruct \
+    --model $model \
     --num_gpus 4 \
     --temperature 0.7 \
     --top_p 0.95 \
@@ -40,4 +43,5 @@ python3 -m crux.augmentation.gen_requests \
     --max_new_tokens 128 \
     --batch_size 64 \
     --load_mode vllm \
+    --add_main_query \
     --shard $SLURM_ARRAY_TASK_ID --total_shards 100

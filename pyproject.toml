@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "crux"
 version = "0.4"
-description = "A modular reranking library with pluggable LLM, prompt, and parser interfaces."
+description = "A summary-driven long-form RAG synthetic data generation pipeline."
 authors = [{ name = "Dylan Ju", email = "j.ju@uva.nl" }]
 dependencies = []
 

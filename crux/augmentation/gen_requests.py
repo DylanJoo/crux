@@ -57,12 +57,12 @@ def main(
     dataset='mds',
     subset='multi_news',
     load_mode='vllm',
-    split='test'
+    split='test',
 ):
 
     # Load data-dependent functions 
     ir_utils = importlib.import_module(f"crux.tools.{dataset}.ir_utils", package=__name__)
-    # all_topic = ir_utils.load_topic()
+    all_topic = ir_utils.load_topic(split=split)
     all_subquestions = ir_utils.load_subtopics(split=split)
 
     # Filter unsanswerable questions
@@ -101,9 +101,14 @@ def main(
     writer = open(output_path, "w")
 
     ## Prepare prompts
-    prompts = [prompt_template.format(
-        subquestions=merge_subquestions(all_subquestions_filterd[id]) 
-    ) for id in qids]
+    if args.add_main_query:
+        prompts = [prompt_template.format(
+            subquestions=merge_subquestions([all_topic[id]] + all_subquestions_filterd[id]) 
+        ) for id in qids]
+    else:
+        prompts = [prompt_template.format(
+            subquestions=merge_subquestions(all_subquestions_filterd[id]) 
+        ) for id in qids]
 
     # Start generation
     requests = []
@@ -138,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("--total_shards", type=int, default=1, help="Total number of shards")
     parser.add_argument("--split", type=str, default='train', help="split of the datasets")
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator")
+    parser.add_argument("--add_main_query", action='store_true', default=False)
 
     # Model and decoding
     parser.add_argument("--load_mode", type=str, default='no', help="['vllm', 'api']")
@@ -165,5 +171,5 @@ if __name__ == "__main__":
         dataset=args.dataset,
         load_mode=args.load_mode,
         subset=args.subset,
-        split=args.split
+        split=args.split,
     )
