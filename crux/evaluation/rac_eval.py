@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if len(missing_qids) > 0:
         qrel = {k: v for k, v in qrel.items() if k in run}
         div_qrel = div_qrel[div_qrel['query_id'].isin(run.keys())]
-        logger.warning(f"Missing results: {len(missing_qids)} / {len(qrel)}")
+        logger.warning(f"Missing results: {len(missing_qids)} out of {len(qrel)}")
         logger.warning(f"Evaluate on the overlapped topics: {len(qrel)}")
 
     # run eval
@@ -100,4 +100,3 @@ if __name__ == "__main__":
         sys.stdout.write(key + " | ")
         sys.stdout.write("{:.4f}".format(np.mean(values)) + " | ")
     sys.stdout.write("\n")
-

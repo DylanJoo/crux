@@ -8,11 +8,11 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=%x-%j.out
 
+# ENV
+source /ivi/ilps/personal/dju/miniconda3/etc/profile.d/conda.sh
+conda activate inference
 
-# Set-up the environment.
-module load anaconda3/2024.2
-conda activate crux
-
+## Use the download collection from: https://huggingface.co/datasets/DylanJHJ/crux-mds-corpus
 python -m pyserini.index.lucene \
     --collection JsonCollection \
     --input ${HOME}/datasets/crux-mds-corpus/collections \

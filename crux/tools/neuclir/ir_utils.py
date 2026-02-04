@@ -41,10 +41,15 @@ def load_topic():
 # NOTE: NeuCLIR use QA-level nugget with empty nugget number 
 def load_subtopics(subset='nuggets'): 
     """ subset='nuggets' or 'subquestions' """
-    file = os.path.join(root_dir, f"crux-neuclir", f"subtopics/{subset}.human.jsonl")
     subquestions = {}
-    items = [json.loads(l) for l in open(file).readlines()]
-    subquestions.update({i['id']: i['nuggets'] for i in items})
+    if subset == 'nuggets':
+        file = os.path.join(root_dir, f"crux-neuclir", f"subtopics/{subset}.human.jsonl")
+        items = [json.loads(l) for l in open(file).readlines()]
+        subquestions.update({i['id']: i['nuggets'] for i in items})
+    elif subset == 'subquestions':
+        file = os.path.join(root_dir, f"crux-neuclir", f"subtopics/subquestions/{subset}.human.jsonl")
+        items = [json.loads(l) for l in open(file).readlines()]
+        subquestions.update({i['id']: i['subquestions'] for i in items})
     return subquestions
 
 def get_qrel(tau=3):
